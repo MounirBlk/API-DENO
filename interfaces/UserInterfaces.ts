@@ -14,8 +14,8 @@ export default interface UserInterfaces {
 
     dateNaiss: Date;
     role: roleTypes;
-    createdAt: Date;
-    updateAt: Date;
+    createdAt?: Date;
+    updateAt?: Date;
 
     // getAge(): Number;
     // fullName(): string;

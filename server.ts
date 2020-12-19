@@ -11,7 +11,7 @@ app.get("/", async(req, res) => {
     ]);
 });
 
-let user = new UserModels('kjkj','kjkj','kjkj','kjkj','kjkj',"1993-11-22");
+let user = new UserModels('kjkj','kjkj','kjkj','kjkj','kjkj',"1993-11-22", 1);
 user.insert()
 console.log(user);
 

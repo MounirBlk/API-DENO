@@ -19,12 +19,12 @@ export class UserModels extends UserDB implements UserInterfaces {
     subscription  : Number;
     sexe: string;
 
-    createdAt: Date;
-    updateAt: Date;
+    createdAt?: Date;
+    updateAt?: Date;
 
 
 
-    constructor(email: string, password: string, nom: string, prenom: string, tel: string, dateNaiss: Date, sexe: string, createdAt: Date, updateAt: Date, subscription  : Number) {
+    constructor(email: string, password: string, nom: string, prenom: string, dateNaiss: string, sexe: string, subscription  : Number) {
         super();
         this.email = email;
         this.lastname = nom;
