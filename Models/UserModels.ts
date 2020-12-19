@@ -7,8 +7,8 @@ import UserInterfaces from '../interfaces/UserInterfaces.ts';
 import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 
 export class UserModels extends UserDB implements UserInterfaces {
-
-    private _role: roleTypes = "User";
+    [x: string]: any;
+    private _role: roleTypes = "tuteur";
     private id:{ $oid: string }|null = null;
 
     email: string;
@@ -16,16 +16,25 @@ export class UserModels extends UserDB implements UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    phoneNumber ? : string;
+    subscription  : Number;
+    sexe: string;
 
-    constructor(email: string, password: string, nom: string, prenom: string, tel: string, dateNaiss: string) {
+    createdAt: Date;
+    updateAt: Date;
+
+
+
+    constructor(email: string, password: string, nom: string, prenom: string, tel: string, dateNaiss: Date, sexe: string, createdAt: Date, updateAt: Date, subscription  : Number) {
         super();
         this.email = email;
         this.lastname = nom;
-        this.phoneNumber = tel;
         this.firstname = prenom;
         this.password = password;
         this.dateNaiss = new Date(dateNaiss);
+        this.subscription= subscription;
+        this.createdAt= new Date();
+        this.updateAt = new Date();
+        this.sexe = sexe;
     }
 
     get _id():string|null{
@@ -40,14 +49,14 @@ export class UserModels extends UserDB implements UserInterfaces {
         this._role = role;
         this.update({role: role});
     }
-    getAge(): Number {
-        var ageDifMs = Date.now() - this.dateNaiss.getTime();
-        var ageDate = new Date(ageDifMs);
-        return Math.abs(ageDate.getUTCFullYear() - 1970);
-    }
-    fullName(): string {
-        return `${this.lastname} ${this.firstname}`;
-    }
+    // getAge(): Number {
+    //     var ageDifMs = Date.now() - this.dateNaiss.getTime();
+    //     var ageDate = new Date(ageDifMs);
+    //     return Math.abs(ageDate.getUTCFullYear() - 1970);
+    // // }
+    // fullName(): string {
+    //     return `${this.lastname} ${this.firstname}`;
+    // }
     async insert(): Promise < void > {
         this.password = await hash(this.password);
         this.id = await this.userdb.insertOne({
@@ -57,10 +66,14 @@ export class UserModels extends UserDB implements UserInterfaces {
             lastname: this.lastname,
             firstname: this.firstname,
             dateNaiss: this.dateNaiss,
-            phoneNumber: this.phoneNumber,
+            subscription: this.subscription,
+            sexe: this.sexe,
+            createdAt: this.createdAt,
+            updateAt: this.updateAt,
+            
         });
     }
-    async update(update:userUpdateTypes): Promise<any> {
+    async update(update:userUpdateTypes): Promise < any > {
         const { modifiedCount } = await this.userdb.updateOne(
             { _id: this.id },
             { $set: update }

@@ -9,14 +9,22 @@ export default interface UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    phoneNumber ? : string;
+    subscription  : Number;
+    sexe: string;
 
     dateNaiss: Date;
     role: roleTypes;
+    createdAt: Date;
+    updateAt: Date;
 
-    getAge(): Number;
-    fullName(): string;
+    // getAge(): Number;
+    // fullName(): string;
     insert(): Promise < void > ;
     update(update:userUpdateTypes): Promise < any > ;
     delete(): Promise < any > ;
 }
+
+
+// créé avec succès", "user": { "firstname": "xxxxxx", "lastname": "xxxxxx", 
+// "email": "xxxxxx", "sexe": "xxxxxx", "role": "xxxxx", "dateNaissance": "xxxx-xx-xx", 
+// "createdAt": "xxxxxx", "updateAt": "xxxxxx", "subscription": 0 } }

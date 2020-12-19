@@ -9,9 +9,7 @@ export class UserDB{
     }
 
 
-    update(): Promise < any > {
-        throw new Error('Method not implemented.');
-    }
+    
     delete(): Promise < any > {
         throw new Error('Method not implemented.');
     }
