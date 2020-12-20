@@ -18,7 +18,7 @@ const login = async (ctx: Context) => {
 /**
  *  Route inscription (TO DO)
  */ 
-const register = async (ctx: Context): Promise<any> => {
+const register = async (ctx: Context) => {
     const data: any = await ctx.body;
     // Vérification de si les données sont bien présentes dans le body
     let error: boolean = false
