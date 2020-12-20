@@ -1,21 +1,21 @@
-import * as expressive from "https://raw.githubusercontent.com/NMathar/deno-express/master/mod.ts";
+import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
+//import { Application, Router, RouterContext } from "https://deno.land/x/oak/mod.ts";//download
+import { Application, Context } from "https://deno.land/x/abc@v1.2.2/mod.ts";//download
 import { config } from './config/config.ts';
-import { UserModels } from './Models/UserModels.ts';
+import { login, register } from "./routes/user.ts";
 
-const port = 8001;
-const app = new expressive.App();
-// route with dynamic parameter
-app.get("/", async(req, res) => {
-    await res.json([
-        { id: 2, name: "Jim Doe", phone: "12425323" },
-    ]);
-});
+const app = new Application();
+const port = 8000;
 
-let user = new UserModels('kjkj','kjkj','kjkj','kjkj','kjkj',"1993-11-22", 1);
-user.insert()
-console.log(user);
+app.static('/', './public');
 
+app.get("/", async(ctx: Context) => await ctx.file(path.join('./public/index.html')));//Page index.html
+app.post('/login', login); //Route login
+app.post('/register', register);//Route register
 
-const server = await app.listen(port);
+//app.get('*', async(ctx: Context) => await ctx.file(path.join('./public/error.html')));//Page error.html
+
 // deno run --allow-net --allow-read --unstable server.ts
-console.log("app listening on port " + server.port);
+// denon
+app.start({port: port})
+console.log(`app listening on -> http://localhost:${port}/`);

@@ -7,8 +7,6 @@ export class UserDB{
     constructor(){
         this.userdb = db.collection<UserInterfaces>("users");
     }
-
-
     
     delete(): Promise < any > {
         throw new Error('Method not implemented.');

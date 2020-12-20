@@ -77,8 +77,8 @@ export class UserModels extends UserDB implements UserInterfaces {
         const { modifiedCount } = await this.userdb.updateOne(
             { _id: this.id },
             { $set: update }
-          );
-          
+        );
+        
     }
     delete(): Promise < any > {
         throw new Error('Method not implemented.');
