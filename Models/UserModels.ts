@@ -12,33 +12,32 @@ export class UserModels extends UserDB implements UserInterfaces {
     private id:{ $oid: string }|null = null;
 
     email: string;
-    dateNaiss: Date;
+    dateNaissance: string;
     password: string;
     lastname: string;
     firstname: string;
     subscription  : Number;
     sexe: string;
-
     createdAt?: Date;
     updateAt?: Date;
+    attempt: Number;
 
-
-
-    constructor(email: string, password: string, nom: string, prenom: string, dateNaiss: string, sexe: string, subscription  : Number) {
+    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:Number, subscription  : Number) {
         super();
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.email = email;
-        this.lastname = nom;
-        this.firstname = prenom;
         this.password = password;
-        this.dateNaiss = new Date(dateNaiss);
-        this.subscription= subscription;
+        this.sexe = sexe;
+        this.dateNaissance = dateNaissance;
         this.createdAt= new Date();
         this.updateAt = new Date();
-        this.sexe = sexe;
+        this.attempt = attempt;
+        this.subscription= subscription;
     }
 
     get _id():string|null{
-        return (this.id === null)?null: this.id.$oid;
+        return (this.id === null) ? null : this.id.$oid;
     }
 
     get role():roleTypes{
@@ -60,25 +59,24 @@ export class UserModels extends UserDB implements UserInterfaces {
     async insert(): Promise < void > {
         this.password = await hash(this.password);
         this.id = await this.userdb.insertOne({
-            role: this._role,
+            firstname: this.firstname,
+            lastname: this.lastname,
             email: this.email,
             password: this.password,
-            lastname: this.lastname,
-            firstname: this.firstname,
-            dateNaiss: this.dateNaiss,
-            subscription: this.subscription,
             sexe: this.sexe,
+            role: this._role,
+            dateNaissance: this.dateNaissance,
             createdAt: this.createdAt,
             updateAt: this.updateAt,
-            
+            attempt: this.attempt,
+            subscription: this.subscription,
         });
     }
     async update(update:userUpdateTypes): Promise < any > {
         const { modifiedCount } = await this.userdb.updateOne(
-            { _id: this.id },
+            { _id:  this.id },
             { $set: update }
         );
-        
     }
     delete(): Promise < any > {
         throw new Error('Method not implemented.');

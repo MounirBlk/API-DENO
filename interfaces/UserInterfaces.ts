@@ -12,11 +12,11 @@ export default interface UserInterfaces {
     subscription  : Number;
     sexe: string;
 
-    dateNaiss: Date;
+    dateNaissance: string;
     role: roleTypes;
     createdAt?: Date;
     updateAt?: Date;
-
+    attempt: Number;
     // getAge(): Number;
     // fullName(): string;
     insert(): Promise < void > ;

@@ -17,5 +17,6 @@ app.post('/register', register);//Route register
 
 // deno run --allow-net --allow-read --unstable server.ts
 // denon
+
 app.start({port: port})
 console.log(`app listening on -> http://localhost:${port}/`);

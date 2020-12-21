@@ -20,7 +20,7 @@ const sendReturn = (ctx: Context, status: number = 500, data: any = { error: tru
  *  Function qui vérifie l'existence d'une data
  */ 
 const exist = (data: string): Boolean => {
-    if (data == undefined || data.trim().length == 0)
+    if (data == undefined || data.trim().length == 0 || data == null)
         return false
     else
         return true
