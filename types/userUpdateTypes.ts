@@ -7,11 +7,11 @@ export type userUpdateTypes =
     password?: string,
     sexe?: string,
     role?: roleTypes,
-    dateNaissance?: Date,
+    dateNaissance?: string,
     createdAt?: Date,
     updateAt?: Date,
-    attempt? : Number,
-    subscription ? : Number,
+    attempt? : number,
+    subscription ? : number,
 }
     
 

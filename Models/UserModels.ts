@@ -2,27 +2,26 @@
 import { hash } from '../helpers/password.helpers.ts';
 import { UserDB } from '../db/userDB.ts';
 import { roleTypes } from '../types/roleTypes.ts';
-
 import UserInterfaces from '../interfaces/UserInterfaces.ts';
 import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 
 export class UserModels extends UserDB implements UserInterfaces {
     [x: string]: any;
     private _role: roleTypes = "tuteur";
-    private id:{ $oid: string }|null = null;
+    private id:{ $oid: string }| null = null;
 
     email: string;
     dateNaissance: string;
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : Number;
+    subscription  : number;
     sexe: string;
     createdAt?: Date;
     updateAt?: Date;
-    attempt: Number;
+    attempt: number;
 
-    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:Number, subscription  : Number) {
+    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number) {
         super();
         this.firstname = firstname;
         this.lastname = lastname;
@@ -36,7 +35,7 @@ export class UserModels extends UserDB implements UserInterfaces {
         this.subscription= subscription;
     }
 
-    get _id():string|null{
+    get _id(): string | null{
         return (this.id === null) ? null : this.id.$oid;
     }
 
@@ -48,6 +47,7 @@ export class UserModels extends UserDB implements UserInterfaces {
         this._role = role;
         this.update({role: role});
     }
+    
     // getAge(): Number {
     //     var ageDifMs = Date.now() - this.dateNaiss.getTime();
     //     var ageDate = new Date(ageDifMs);

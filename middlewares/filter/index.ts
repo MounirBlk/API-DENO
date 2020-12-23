@@ -11,9 +11,20 @@ const sendReturn = (ctx: Context, status: number = 500, data: any = { error: tru
     try {
         ctx.json(data, status)
     } catch (error) {
-        let sendError = { error: true, message: "Processing error" }
+        //Cette erreur ne DOIT ne jamais apparaitre
+        let sendError = { error: true, message: "Processing error !" }
         ctx.json(sendError, 500)
     }
+}
+
+/**
+ *  Function qui supprime les données return initule
+ */ 
+const deleteUserMapper = (data: any): any => {
+    delete data._id;
+    delete data.password;
+    delete data.attempt;
+    return data;
 }
 
 /**
@@ -110,4 +121,4 @@ const floatFormat = (data: string): Boolean => {
     else
         return true
 }
-export { sendReturn, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
+export { sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};

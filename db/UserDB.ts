@@ -8,10 +8,9 @@ export class UserDB{
         this.userdb = db.collection<UserInterfaces>("users");
     }
     
-    /*async getUser(email: any): Promise < UserInterfaces > {
-        const user = await this.userdb.findOne({ email: email.trim().toLowerCase() })
-        return user;
-    }*/
+    async selectUser(email: string):Promise <UserInterfaces>{
+        return await this.userdb.findOne({ email: email.trim().toLowerCase() })
+    }
 
     delete(): Promise < any > {
         throw new Error('Method not implemented.');

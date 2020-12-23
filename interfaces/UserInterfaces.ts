@@ -9,14 +9,13 @@ export default interface UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : Number;
+    subscription  : number;
     sexe: string;
-
     dateNaissance: string;
     role: roleTypes;
     createdAt?: Date;
     updateAt?: Date;
-    attempt: Number;
+    attempt: number;
     // getAge(): Number;
     // fullName(): string;
     insert(): Promise < void > ;
