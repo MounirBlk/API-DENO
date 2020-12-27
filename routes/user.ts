@@ -31,7 +31,7 @@ const login = async (ctx: RouterContext) => {
                 }else{
                     const jwtToken = await create({ alg: "HS512", typ: "JWT" }, { exp: getNumericDate(parseInt(config.JWT_ACCESS_TOKEN_EXP)) , id: user._id }, config.JWT_TOKEN_SECRET)
                     user.token = jwtToken;
-                    utilisateur.setId(user._id);
+                    utilisateur.setId(<{ $oid: string }>user._id);
                     utilisateur.update(user)
                     return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user)})
                 }
@@ -41,13 +41,13 @@ const login = async (ctx: RouterContext) => {
                 }else if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) >= 2){
                     user.updateAt = new Date();
                     user.attempt = 1;
-                    utilisateur.setId(user._id);
+                    utilisateur.setId(<{ $oid: string }>user._id);
                     utilisateur.update(user)
                     return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
                 }else{
                     user.updateAt = new Date();
                     user.attempt = user.attempt + 1;
-                    utilisateur.setId(user._id);
+                    utilisateur.setId(<{ $oid: string }>user._id);
                     utilisateur.update(user)
                     return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
                 }

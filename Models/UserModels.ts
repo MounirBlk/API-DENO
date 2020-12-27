@@ -49,7 +49,7 @@ export class UserModels extends UserDB implements UserInterfaces {
         this.update({role: role});
     }
     
-    setId (id: any): void{
+    setId (id: { $oid: string } | null): void{
         this.id = id;
     }
     // getAge(): Number {
