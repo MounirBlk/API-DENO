@@ -2,43 +2,42 @@
 import { hash } from '../helpers/password.helpers.ts';
 import { UserDB } from '../db/userDB.ts';
 import { roleTypes } from '../types/roleTypes.ts';
-
 import UserInterfaces from '../interfaces/UserInterfaces.ts';
 import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 
 export class UserModels extends UserDB implements UserInterfaces {
     [x: string]: any;
     private _role: roleTypes = "tuteur";
-    private id:{ $oid: string }|null = null;
+    private id:{ $oid: string }| null = null;
 
     email: string;
-    dateNaiss: Date;
+    dateNaissance: string;
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : Number;
+    subscription  : number;
     sexe: string;
-
     createdAt?: Date;
     updateAt?: Date;
+    attempt: number;
+    token?: string | null = null;
 
-
-
-    constructor(email: string, password: string, nom: string, prenom: string, dateNaiss: string, sexe: string, subscription  : Number) {
+    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.email = email;
-        this.lastname = nom;
-        this.firstname = prenom;
         this.password = password;
-        this.dateNaiss = new Date(dateNaiss);
-        this.subscription= subscription;
+        this.sexe = sexe;
+        this.dateNaissance = dateNaissance;
         this.createdAt= new Date();
         this.updateAt = new Date();
-        this.sexe = sexe;
+        this.attempt = attempt;
+        this.subscription= subscription;
     }
 
-    get _id():string|null{
-        return (this.id === null)?null: this.id.$oid;
+    get _id(): string | null{
+        return (this.id === null) ? null : this.id.$oid;
     }
 
     get role():roleTypes{
@@ -48,6 +47,10 @@ export class UserModels extends UserDB implements UserInterfaces {
     setRole(role: roleTypes): void {
         this._role = role;
         this.update({role: role});
+    }
+    
+    setId (id: { $oid: string } | null): void{
+        this.id = id;
     }
     // getAge(): Number {
     //     var ageDifMs = Date.now() - this.dateNaiss.getTime();
@@ -60,25 +63,25 @@ export class UserModels extends UserDB implements UserInterfaces {
     async insert(): Promise < void > {
         this.password = await hash(this.password);
         this.id = await this.userdb.insertOne({
-            role: this._role,
+            firstname: this.firstname,
+            lastname: this.lastname,
             email: this.email,
             password: this.password,
-            lastname: this.lastname,
-            firstname: this.firstname,
-            dateNaiss: this.dateNaiss,
-            subscription: this.subscription,
             sexe: this.sexe,
+            role: this._role,
+            dateNaissance: this.dateNaissance,
             createdAt: this.createdAt,
             updateAt: this.updateAt,
-            
+            attempt: this.attempt,
+            subscription: this.subscription,
+            token: this.token,
         });
     }
     async update(update:userUpdateTypes): Promise < any > {
         const { modifiedCount } = await this.userdb.updateOne(
-            { _id: this.id },
+            { _id:  this.id },
             { $set: update }
         );
-        
     }
     delete(): Promise < any > {
         throw new Error('Method not implemented.');

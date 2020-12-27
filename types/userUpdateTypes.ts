@@ -1,21 +1,18 @@
 import { roleTypes } from './roleTypes.ts';
 export type userUpdateTypes = 
 {
-
+    firstname?: string,
+    lastname?: string,
     email?: string,
     password?: string,
-    lastname?: string,
-    firstname?: string,
-   
-
-    dateNaiss?: Date,
-
-    role?: roleTypes,
-    subscription ? : Number,
     sexe?: string,
-
+    role?: roleTypes,
+    dateNaissance?: string,
     createdAt?: Date,
     updateAt?: Date,
+    attempt? : number,
+    subscription ? : number,
+    token?: string | null
 }
     
 

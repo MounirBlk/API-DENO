@@ -9,13 +9,14 @@ export default interface UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : Number;
+    subscription  : number;
     sexe: string;
-
-    dateNaiss: Date;
+    dateNaissance: string;
     role: roleTypes;
     createdAt?: Date;
     updateAt?: Date;
+    attempt: number;
+    token?: string | null;
 
     // getAge(): Number;
     // fullName(): string;
