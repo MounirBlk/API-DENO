@@ -20,8 +20,9 @@ export class UserModels extends UserDB implements UserInterfaces {
     createdAt?: Date;
     updateAt?: Date;
     attempt: number;
+    token?: string | null = null;
 
-    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number) {
+    constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
         this.firstname = firstname;
         this.lastname = lastname;
@@ -48,6 +49,9 @@ export class UserModels extends UserDB implements UserInterfaces {
         this.update({role: role});
     }
     
+    setId (id: any): void{
+        this.id = id;
+    }
     // getAge(): Number {
     //     var ageDifMs = Date.now() - this.dateNaiss.getTime();
     //     var ageDate = new Date(ageDifMs);
@@ -70,6 +74,7 @@ export class UserModels extends UserDB implements UserInterfaces {
             updateAt: this.updateAt,
             attempt: this.attempt,
             subscription: this.subscription,
+            token: this.token,
         });
     }
     async update(update:userUpdateTypes): Promise < any > {

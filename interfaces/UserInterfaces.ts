@@ -16,6 +16,8 @@ export default interface UserInterfaces {
     createdAt?: Date;
     updateAt?: Date;
     attempt: number;
+    token?: string | null;
+
     // getAge(): Number;
     // fullName(): string;
     insert(): Promise < void > ;

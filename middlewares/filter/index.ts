@@ -1,19 +1,42 @@
-import { Context } from "https://deno.land/x/abc@v1.2.2/mod.ts";//download
+import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
+
+/**
+ * Function qui fait un retourne les données envoyéss
+ * @param {RouterContext} ctx 
+ */
+const dataRequest = async (ctx: RouterContext) => {
+    const body: any = ctx.request.body();
+    let data;
+    if (body.type === "json") {
+        data = await body.value;
+    } else if (body.type === "form") {
+        data = {};
+        for (const [key, value] of await body.value) {
+            data[key as keyof Object] = value;
+        }
+    } else if (body.type === "form-data") {
+        const formData = await body.value.read();
+        data = formData.fields;
+    }
+    return data;
+}
 
 /**
  * Function qui fait un retour d'une donnée
- * @param {Context} ctx 
+ * @param {RouterContext} ctx 
  * @param {Number} status 
  * @param {Object} data 
  */
-const sendReturn = (ctx: Context, status: number = 500, data: any = { error: true, message: "Processing error" }) => {
+const sendReturn = (ctx: RouterContext, status: number = 500, data: any = { error: true, message: "Processing error" }) => {
     ctx.response.headers.append('Content-Type','application/json')
     try {
-        ctx.json(data, status)
+        ctx.response.status = status;
+        ctx.response.body = data;
     } catch (error) {
-        //Cette erreur ne DOIT ne jamais apparaitre
+        //Cette erreur ne DOIT jamais apparaitre
         let sendError = { error: true, message: "Processing error !" }
-        ctx.json(sendError, 500)
+        ctx.response.status = 500;
+        ctx.response.body = sendError;
     }
 }
 
@@ -121,4 +144,4 @@ const floatFormat = (data: string): Boolean => {
     else
         return true
 }
-export { sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
+export { dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};

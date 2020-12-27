@@ -12,6 +12,7 @@ export type userUpdateTypes =
     updateAt?: Date,
     attempt? : number,
     subscription ? : number,
+    token?: string | null
 }
     
 
