@@ -77,11 +77,12 @@ export class UserModels extends UserDB implements UserInterfaces {
             token: this.token,
         });
     }
-    async update(update:userUpdateTypes): Promise < any > {
+    async update(update:userUpdateTypes): Promise < number > {
         const { modifiedCount } = await this.userdb.updateOne(
             { _id:  this.id },
             { $set: update }
         );
+        return modifiedCount;
     }
     delete(): Promise < any > {
         throw new Error('Method not implemented.');
