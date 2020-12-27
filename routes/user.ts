@@ -32,8 +32,11 @@ const login = async (ctx: RouterContext) => {
                     const jwtToken = await create({ alg: "HS512", typ: "JWT" }, { exp: getNumericDate(parseInt(config.JWT_ACCESS_TOKEN_EXP)) , id: user._id }, config.JWT_TOKEN_SECRET)
                     user.token = jwtToken;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    utilisateur.update(user)
-                    return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user)})
+                    let isSuccess = utilisateur.update(user);
+                    if(isSuccess || isSuccess === 1)
+                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user)})
+                    else
+                        return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
             }else{
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
@@ -42,14 +45,20 @@ const login = async (ctx: RouterContext) => {
                     user.updateAt = new Date();
                     user.attempt = 1;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    utilisateur.update(user)
-                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
+                    let isSuccess = utilisateur.update(user);
+                    if(isSuccess || isSuccess === 1)
+                        return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
+                    else
+                        return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }else{
                     user.updateAt = new Date();
                     user.attempt = user.attempt + 1;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    utilisateur.update(user)
-                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
+                    let isSuccess = utilisateur.update(user);
+                    if(isSuccess || isSuccess === 1)
+                        return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
+                    else
+                        return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
             }
         }
