@@ -1,4 +1,4 @@
-import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/filter/index.ts";
+//import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/filter/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -70,11 +70,22 @@ const login = async (ctx: RouterContext) => {
  */ 
 const register = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx)
+    
     // Vérification de si les données sont bien présentes dans le body
-    let error: boolean = false;
-    let user = new UserModels('kjkj@toto.com','kjkj','kjkj','kjkj',"1993-11-22",'Homme',0 ,0);
-    user.insert()
-    return sendReturn(ctx, 200, { error: false, message: user})
+    // Vérification de si les données sont bien présentes dans le body
+    if(exist(data.Email) == false || exist(data.Password) == false){
+        return sendReturn(ctx, 400, { error: true, message: 'adresse mail ou mot de passe manquant!'})
+    }else{
+        
+        if (ctx.request.Email  == data.Email  ) {
+
+        return sendReturn(ctx, 400, { error: true, message: 'L adresse mail existe déjà'}) 
+        }
+    else {
+        return true 
+    }
+    }
+   
 }
 
 export { login, register};

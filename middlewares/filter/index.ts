@@ -143,5 +143,5 @@ const floatFormat = (data: string): Boolean => {
         return false
     else
         return true
-}
+        
 export { dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};

@@ -1,0 +1,22 @@
+{
+  "name": "api_deno",
+  "version": "1.0.0",
+  "description": "API-DENO-Flux Radio Project balluk et Fatimazahra Elhasi RUN:`denorun --allow-net -allow-read--stable servert`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MounirBlk/API-DENO.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MounirBlk/API-DENO/issues"
+  },
+  "homepage": "https://github.com/MounirBlk/API-DENO#readme",
+  "directories": {
+    "doc": "doc"
+  }
+}
