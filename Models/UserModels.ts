@@ -88,3 +88,5 @@ export class UserModels extends UserDB implements UserInterfaces {
         throw new Error('Method not implemented.');
     }
 }
+
+export const users: UserModels[] = [];

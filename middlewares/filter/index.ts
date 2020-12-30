@@ -142,6 +142,6 @@ const floatFormat = (data: string): Boolean => {
     if (data.match(regexFloat) == null)
         return false
     else
-        return true
+        return true}
         
 export { dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};

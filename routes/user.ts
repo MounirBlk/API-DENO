@@ -1,4 +1,4 @@
-//import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/filter/index.ts";
+import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/filter/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -25,7 +25,7 @@ const login = async (ctx: RouterContext) => {
         }else{
             const isValid = await comparePass(data.Password, user.password); //verification password
             let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
-            if(isValid){
+            if(isValid){ // true
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else{
@@ -38,7 +38,7 @@ const login = async (ctx: RouterContext) => {
                     else
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
-            }else{
+            }else{ // false
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) >= 2){
@@ -68,24 +68,23 @@ const login = async (ctx: RouterContext) => {
 /**
  *  Route inscription
  */ 
-const register = async (ctx: RouterContext) => {
-    const data = await dataRequest(ctx)
-    
-    // Vérification de si les données sont bien présentes dans le body
-    // Vérification de si les données sont bien présentes dans le body
-    if(exist(data.Email) == false || exist(data.Password) == false){
-        return sendReturn(ctx, 400, { error: true, message: 'adresse mail ou mot de passe manquant!'})
-    }else{
-        
-        if (ctx.request.Email  == data.Email  ) {
+        const register = async (ctx: RouterContext) => {
+            const data = await dataRequest(ctx)
+            const dbCollection =  new UserDB();
+            const user = await dbCollection.selectUser(data.email.trim().toLowerCase())
+            if (user == data.email){ 
+                return sendReturn(ctx, 400, { error: true, message: 'adresse mail exist déjà'}) 
+            }
 
-        return sendReturn(ctx, 400, { error: true, message: 'L adresse mail existe déjà'}) 
-        }
-    else {
-        return true 
-    }
-    }
-   
-}
+            else if(exist(data.email) == false || exist(data.Password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.dateNaissance) == false|| exist(data.sexe) == false ){
+                return sendReturn(ctx, 400, { error: true, message: 'champ manquant'})
+            }else{
+                //insertion dans la base de données 
+                let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.dateNaissance, data.sexe, data.attempt, data.subscription);
+                await utilisateur.insert();
+                console.log(utilisateur);
+            }
+     
+ }
 
 export { login, register};
