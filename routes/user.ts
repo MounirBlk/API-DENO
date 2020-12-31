@@ -70,13 +70,13 @@ const login = async (ctx: RouterContext) => {
  */ 
         const register = async (ctx: RouterContext) => {
             const data = await dataRequest(ctx)
-            const dbCollection =  new UserDB();
-            const user = await dbCollection.selectUser(data.email.trim().toLowerCase())
-            if (user == data.email){ 
-                return sendReturn(ctx, 400, { error: true, message: 'adresse mail exist déjà'}) 
-            }
+            // const dbCollection =  new UserDB();
+            // const user = await dbCollection.selectUser()
+            // if (user == data.email){ 
+            //     return sendReturn(ctx, 400, { error: true, message: 'adresse mail exist déjà'}) 
+            // }
 
-            else if(exist(data.email) == false || exist(data.Password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.dateNaissance) == false|| exist(data.sexe) == false ){
+          if(exist(data.email) == false || exist(data.Password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.dateNaissance) == false|| exist(data.sexe) == false ){
                 return sendReturn(ctx, 400, { error: true, message: 'champ manquant'})
             }else{
                 //insertion dans la base de données 
