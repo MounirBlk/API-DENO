@@ -6,6 +6,7 @@ import { comparePass } from "../helpers/password.helpers.ts";
 import { UserDB } from "../db/userDB.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { config } from '../config/config.ts';
+import { getAuthToken } from "../helpers/jwt.ts";
 
 /**
  *  Route login user
@@ -29,7 +30,7 @@ const login = async (ctx: RouterContext) => {
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else{
-                    const jwtToken = await create({ alg: "HS512", typ: "JWT" }, { exp: getNumericDate(parseInt(config.JWT_ACCESS_TOKEN_EXP)) , id: user._id }, config.JWT_TOKEN_SECRET)
+                    const jwtToken = await getAuthToken(user);
                     user.token = jwtToken;
                     utilisateur.setId(<{ $oid: string }>user._id);
                     let isSuccess = utilisateur.update(user);

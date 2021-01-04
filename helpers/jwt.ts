@@ -13,7 +13,7 @@ const header: any = {
     typ: "JWT",
 };
 
-const getAuthToken = async (user: any) => {
+const getAuthToken = async (user: any): Promise < string >  => {
     const payload: any = {
         iss: "deno-imie-api",
         id: user.id,
