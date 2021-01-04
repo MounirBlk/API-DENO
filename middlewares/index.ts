@@ -144,4 +144,12 @@ const floatFormat = (data: string): Boolean => {
     else
         return true
 }
-export { dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
+
+/**
+ *  Function vérification si le mdp possede 6 caracteres min
+ */ 
+const isValidPassword = (password: string): boolean => {
+    return password.length >= 6 ? true : false;
+}
+
+export { isValidPassword, dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
