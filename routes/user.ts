@@ -6,7 +6,7 @@ import { comparePass } from "../helpers/password.helpers.ts";
 import { UserDB } from "../db/userDB.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { config } from '../config/config.ts';
-import { getAuthToken } from "../helpers/jwt.ts";
+import { getAuthToken } from "../helpers/jwt.helpers.ts";
 
 /**
  *  Route login user

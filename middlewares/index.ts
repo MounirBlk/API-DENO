@@ -152,4 +152,4 @@ const isValidPassword = (password: string): boolean => {
     return password.length >= 6 ? true : false;
 }
 
-export { isValidPassword, dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
+export { dataRequest, sendReturn, isValidPassword, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
