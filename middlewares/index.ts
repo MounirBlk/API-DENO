@@ -47,6 +47,7 @@ const deleteUserMapper = (data: any): any => {
     delete data._id;
     delete data.password;
     delete data.attempt;
+    delete data.token;
     return data;
 }
 

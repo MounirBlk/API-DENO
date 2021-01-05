@@ -35,7 +35,7 @@ const login = async (ctx: RouterContext) => {
                     utilisateur.setId(<{ $oid: string }>user._id);
                     let isSuccess = utilisateur.update(user);
                     if(isSuccess || isSuccess === 1)
-                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user)})
+                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user), token: jwtToken})
                     else
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
