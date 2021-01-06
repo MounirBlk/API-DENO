@@ -21,6 +21,7 @@ export class UserModels extends UserDB implements UserInterfaces {
     updateAt?: Date;
     attempt: number;
     token?: string | null = null;
+    idChildsTab: Array<any> = [] ;
 
     constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
@@ -60,7 +61,7 @@ export class UserModels extends UserDB implements UserInterfaces {
     // fullName(): string {
     //     return `${this.lastname} ${this.firstname}`;
     // }
-    async insert(): Promise < void > {
+    async insert(): Promise < any > {
         this.password = await hash(this.password);
         this.id = await this.userdb.insertOne({
             firstname: this.firstname,
@@ -75,7 +76,9 @@ export class UserModels extends UserDB implements UserInterfaces {
             attempt: this.attempt,
             subscription: this.subscription,
             token: this.token,
+            idChildsTab: this.idChildsTab
         });
+        return this.id;
     }
     async update(update:userUpdateTypes): Promise < number > {
         const { modifiedCount } = await this.userdb.updateOne(

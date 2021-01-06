@@ -30,17 +30,26 @@ const newChild = async (ctx: RouterContext) => {
         (data.sexe !== "Homme" && data.sexe !== "Femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{
-            const dbCollection = new UserDB();
-            if(await dbCollection.selectUser(data.email.trim().toLowerCase()) !== undefined){            
+            const dbCollectionTestEmail = new UserDB();
+            if(await dbCollectionTestEmail.selectUser(data.email.trim().toLowerCase()) !== undefined){            
                 return sendReturn(ctx, 409, { error: true, message: 'Un compte utilisant cette adresse mail est déjà enregistré'})
             }else{
-                //TODO 3 enfants max
-                let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 1);
-                utilisateur.setRole('enfant')
-                await utilisateur.insert();
-                let isSuccess = await utilisateur.update({token: await getAuthToken(utilisateur)})
+                const dbCollection = new UserDB();
+                let userParent = await dbCollection.selectUser(payloadToken.email.trim().toLowerCase())
+                let tabChilds: Array<any> = []
+                tabChilds = userParent.idChildsTab;
+                if (tabChilds.length >= 3) return sendReturn(ctx, 409, { error: true, message: 'Vous avez dépassé le cota de trois enfants'})                
+                let utilisateurChild = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 1);
+                utilisateurChild.setRole('enfant')
+                const idChild = await utilisateurChild.insert();
+                let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
+                tabChilds.push(idChild)
+                utilisateurParent.setId(<{ $oid: string }>userParent._id)
+                let isValid = await utilisateurParent.update({idChildsTab: tabChilds})
+                if (!isValid || isValid === 0) return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
+                let isSuccess = await utilisateurChild.update({token: await getAuthToken(utilisateurChild)})
                 if(isSuccess || isSuccess === 1){
-                    return sendReturn(ctx, 200, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateur, 'newChild')})//Mapper to perform pour l'ordre du role
+                    return sendReturn(ctx, 200, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateurChild, 'newChild')})//Mapper to perform pour l'ordre du role
                 }else{
                     return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
