@@ -9,6 +9,7 @@ import { config } from '../config/config.ts';
 import { getAuthToken, getJwtPayload } from "../helpers/jwt.helpers.ts";
 import EmailException from "../exceptions/EmailException.ts";
 import DateException from "../exceptions/DateException.ts";
+import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 
 /**
  *  Route new child
@@ -31,13 +32,13 @@ const newChild = async (ctx: RouterContext) => {
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{
             const dbCollectionTestEmail = new UserDB();
-            if(await dbCollectionTestEmail.selectUser(data.email.trim().toLowerCase()) !== undefined){            
+            if(await dbCollectionTestEmail.count({ email: data.email.trim().toLowerCase() }) !== 0){            
                 return sendReturn(ctx, 409, { error: true, message: 'Un compte utilisant cette adresse mail est déjà enregistré'})
             }else{
                 const dbCollection = new UserDB();
-                let userParent = await dbCollection.selectUser(payloadToken.email.trim().toLowerCase())
+                let userParent = await dbCollection.selectUser({_id: new Bson.ObjectId(payloadToken.id) })
                 let tabChilds: Array<any> = []
-                tabChilds = userParent.idChildsTab;
+                tabChilds = userParent.childsTab;
                 if (tabChilds.length >= 3){
                     return sendReturn(ctx, 409, { error: true, message: 'Vous avez dépassé le cota de trois enfants'})  
                 }else{
@@ -47,11 +48,11 @@ const newChild = async (ctx: RouterContext) => {
                     let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
                     tabChilds.push(idChild)
                     utilisateurParent.setId(<{ $oid: string }>userParent._id)
-                    let isValid = await utilisateurParent.update({idChildsTab: tabChilds})
+                    let isValid = await utilisateurParent.update({childsTab: tabChilds})
                     if (!isValid || isValid === 0){
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                     }else{
-                        let isSuccess = await utilisateurChild.update({token: await getAuthToken(utilisateurChild)})
+                        let isSuccess = await utilisateurChild.update({token: await getAuthToken(utilisateurChild, idChild)})
                         if(isSuccess || isSuccess === 1){
                             return sendReturn(ctx, 200, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateurChild, 'newChild')})//Mapper to perform pour l'ordre du role
                         }else{
@@ -64,4 +65,38 @@ const newChild = async (ctx: RouterContext) => {
     }
 }
 
-export { newChild };
+/**
+ *  Route delete child
+ *  @param {RouterContext} ctx 
+ */ 
+const deleteChild = async (ctx: RouterContext) => {
+    const data = await dataRequest(ctx);
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined){
+        return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+    } else{
+        if (payloadToken.role.toLowerCase() !== 'tuteur'){
+            return sendReturn(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+        } else{
+            const dbCollectionChildExist = new UserDB();
+            if (data == undefined || data == null || await dbCollectionChildExist.selectUser({ _id: new Bson.ObjectId(data.id) }) === undefined) return sendReturn(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
+            const dbCollection = new UserDB();
+            let userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+            if(userParent !== undefined && userParent !== null){
+                if(userParent.childsTab.filter(item => item.toString() === data.id).length === 0 && userParent.childsTab.find(item => item.toString() === data.id) === undefined){
+                    return sendReturn(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
+                }else{
+                    await dbCollection.delete({ _id: new Bson.ObjectId(data.id) })
+                    const utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
+                    utilisateurParent.setId(<{ $oid: string }>userParent._id)
+                    utilisateurParent.update({childsTab: userParent.childsTab.filter(item => item.toString() !== data.id)})
+                    return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été supprimée avec succès"})
+                }
+            }else{
+                return sendReturn(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) //cette erreur est optionnel grace a la condition de test payloadToken
+            }
+        }
+    }
+}
+
+export { newChild, deleteChild };

@@ -21,7 +21,7 @@ export class UserModels extends UserDB implements UserInterfaces {
     updateAt?: Date;
     attempt: number;
     token?: string | null = null;
-    idChildsTab: Array<any> = [] ;
+    childsTab: Array<any> = [] ;
 
     constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
@@ -76,7 +76,7 @@ export class UserModels extends UserDB implements UserInterfaces {
             attempt: this.attempt,
             subscription: this.subscription,
             token: this.token,
-            idChildsTab: this.idChildsTab
+            childsTab: this.childsTab
         });
         return this.id;
     }
@@ -86,8 +86,5 @@ export class UserModels extends UserDB implements UserInterfaces {
             { $set: update }
         );
         return modifiedCount;
-    }
-    delete(): Promise < any > {
-        throw new Error('Method not implemented.');
     }
 }

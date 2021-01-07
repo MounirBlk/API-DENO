@@ -21,7 +21,7 @@ const login = async (ctx: RouterContext) => {
     }else{
         //const user: any = await db.collection('users').findOne({ email: Email.trim().toLowerCase() })
         const dbCollection =  new UserDB();
-        const user = await dbCollection.selectUser(data.Email.trim().toLowerCase())
+        const user = await dbCollection.selectUser({email : data.Email.trim().toLowerCase()})
         if (user == undefined || user == null) {
             return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
         }else{
@@ -31,7 +31,7 @@ const login = async (ctx: RouterContext) => {
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else{
-                    const jwtToken = await getAuthToken(user);
+                    const jwtToken = await getAuthToken(user, user._id);
                     user.token = jwtToken;
                     utilisateur.setId(<{ $oid: string }>user._id);
                     let isSuccess = await utilisateur.update(user);
