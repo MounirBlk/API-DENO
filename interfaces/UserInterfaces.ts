@@ -17,6 +17,7 @@ export default interface UserInterfaces {
     updateAt?: Date;
     attempt: number;
     token?: string | null;
+    idChildsTab: Array<any>;
 
     // getAge(): Number;
     // fullName(): string;

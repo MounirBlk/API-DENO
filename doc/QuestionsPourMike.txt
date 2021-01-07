@@ -1,0 +1,3 @@
+La civilite est-il limité à la casse ?
+Un nom ou prenom peut-il posséder des chiffres et/ou tiret ou slash
+Spécifier l'ordre des reponses d'erreur

@@ -1,4 +1,4 @@
-import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, sendReturn } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -10,15 +10,16 @@ import { getAuthToken } from "../helpers/jwt.helpers.ts";
 
 /**
  *  Route login user
+ *  @param {RouterContext} ctx 
  */ 
 const login = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     // Vérification de si les données sont bien présentes dans le body
+    if(data === undefined || data === null) return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
     if(exist(data.Email) == false || exist(data.Password) == false){
         return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
     }else{
-        //const dbCollection = db.collection('users');
-        //const user: any = await dbCollection.findOne({ email: Email.trim().toLowerCase() })
+        //const user: any = await db.collection('users').findOne({ email: Email.trim().toLowerCase() })
         const dbCollection =  new UserDB();
         const user = await dbCollection.selectUser(data.Email.trim().toLowerCase())
         if (user == undefined || user == null) {
@@ -33,9 +34,9 @@ const login = async (ctx: RouterContext) => {
                     const jwtToken = await getAuthToken(user);
                     user.token = jwtToken;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    let isSuccess = utilisateur.update(user);
+                    let isSuccess = await utilisateur.update(user);
                     if(isSuccess || isSuccess === 1)
-                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteUserMapper(user), token: jwtToken})
+                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteMapper(user, 'login'), token: jwtToken})
                     else
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
@@ -46,7 +47,7 @@ const login = async (ctx: RouterContext) => {
                     user.updateAt = new Date();
                     user.attempt = 1;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    let isSuccess = utilisateur.update(user);
+                    let isSuccess = await utilisateur.update(user);
                     if(isSuccess || isSuccess === 1)
                         return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
                     else
@@ -55,7 +56,7 @@ const login = async (ctx: RouterContext) => {
                     user.updateAt = new Date();
                     user.attempt = user.attempt + 1;
                     utilisateur.setId(<{ $oid: string }>user._id);
-                    let isSuccess = utilisateur.update(user);
+                    let isSuccess = await utilisateur.update(user);
                     if(isSuccess || isSuccess === 1)
                         return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})
                     else

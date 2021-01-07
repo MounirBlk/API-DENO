@@ -1,6 +1,8 @@
 import { create, verify, decode, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";
 import { config } from '../config/config.ts';
-
+import UserInterfaces from "../interfaces/UserInterfaces.ts";
+import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
+import { sendReturn } from "../middlewares/index.ts";
 
 const {
     JWT_TOKEN_SECRET,
@@ -13,6 +15,10 @@ const header: any = {
     typ: "JWT",
 };
 
+/**
+ * Function qui fait un retourne un token
+ * @param {UserInterfaces} user 
+ */
 const getAuthToken = async (user: any): Promise < string >  => {
     const payload: any = {
         iss: "deno-imie-api",
@@ -25,6 +31,10 @@ const getAuthToken = async (user: any): Promise < string >  => {
     return await create(header, payload, JWT_TOKEN_SECRET);
 };
 
+/**
+ * Function qui fait un retourne un refresh token
+ * @param {UserInterfaces} user 
+ */
 const getRefreshToken = async(user: any) => {
     const payload: any = {
         iss: "deno-imie-api",
@@ -35,13 +45,22 @@ const getRefreshToken = async(user: any) => {
     return await create(header, payload, JWT_TOKEN_SECRET);
 };
 
-const getJwtPayload = async(token: string): Promise < any | null > => {
+/**
+ * Function qui test le token et recupere le payload du token
+ */
+const getJwtPayload = async(ctx: RouterContext, tokenHeader: string | null): Promise < any | null > => {
     try {
-        const jwtObject = await verify(token, JWT_TOKEN_SECRET, header.alg);
-        if (jwtObject && jwtObject.payload) {
-            return jwtObject.payload;
+        if (tokenHeader) {
+            const token = tokenHeader.replace(/^bearer/i, "").trim();
+            const jwtObject = await verify(token, JWT_TOKEN_SECRET, header.alg);
+            if (jwtObject && jwtObject !== null && jwtObject !== undefined) {
+                return jwtObject;
+            }
         }
-    } catch (err) {}
+        return null;
+    } catch (err) {
+        console.log(err)
+    }
     return null;
 };
 
