@@ -27,7 +27,7 @@ const login = async (ctx: RouterContext) => {
         }else{
             const isValid = await comparePass(data.Password, user.password); //verification password
             let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
-            if(isValid){
+            if(isValid){ // true
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else{
@@ -40,7 +40,7 @@ const login = async (ctx: RouterContext) => {
                     else
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
-            }else{
+            }else{ // false
                 if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                     return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                 }else if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) >= 2){
@@ -70,13 +70,23 @@ const login = async (ctx: RouterContext) => {
 /**
  *  Route inscription
  */ 
-const register = async (ctx: RouterContext) => {
-    const data = await dataRequest(ctx)
-    // Vérification de si les données sont bien présentes dans le body
-    let error: boolean = false;
-    let user = new UserModels('kjkj@toto.com','kjkj','kjkj','kjkj',"1993-11-22",'Homme',0 ,0);
-    user.insert()
-    return sendReturn(ctx, 200, { error: false, message: user})
-}
+        const register = async (ctx: RouterContext) => {
+            const data = await dataRequest(ctx)
+            // const dbCollection =  new UserDB();
+            // const user = await dbCollection.selectUser()
+            // if (user == data.email){ 
+            //     return sendReturn(ctx, 400, { error: true, message: 'adresse mail exist déjà'}) 
+            // }
+
+          if(exist(data.email) == false || exist(data.Password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.dateNaissance) == false|| exist(data.sexe) == false ){
+                return sendReturn(ctx, 400, { error: true, message: 'champ manquant'})
+            }else{
+                //insertion dans la base de données 
+                let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.dateNaissance, data.sexe, data.attempt, data.subscription);
+                await utilisateur.insert();
+                console.log(utilisateur);
+            }
+     
+ }
 
 export { login, register};
