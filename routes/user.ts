@@ -1,4 +1,4 @@
-import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/filter/index.ts";
+import { dataRequest, deleteUserMapper, exist, sendReturn } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download

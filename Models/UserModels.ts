@@ -84,9 +84,5 @@ export class UserModels extends UserDB implements UserInterfaces {
         );
         return modifiedCount;
     }
-    delete(): Promise < any > {
-        throw new Error('Method not implemented.');
-    }
 }
 
-export const users: UserModels[] = [];
