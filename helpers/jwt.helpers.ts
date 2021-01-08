@@ -19,15 +19,14 @@ const header: any = {
  * Function qui fait un retourne un token
  * @param {UserInterfaces} user 
  */
-const getAuthToken = async (user: any): Promise < string >  => {
+const getAuthToken = async (user: any, idChild: any): Promise < string >  => {
     const payload: any = {
         iss: "deno-imie-api",
-        id: user.id,
+        id: idChild,
         email: user.email,
         role: user.role,
         exp: getNumericDate(new Date().getTime() + parseInt(JWT_ACCESS_TOKEN_EXP)),
     };
-
     return await create(header, payload, JWT_TOKEN_SECRET);
 };
 

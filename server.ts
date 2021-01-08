@@ -1,7 +1,7 @@
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
-import { newChild } from "./routes/child.ts";
+import { deleteChild, newChild } from "./routes/child.ts";
 import { login, register } from "./routes/user.ts";
 
 const app = new Application();
@@ -24,6 +24,7 @@ app.use(async (context) => {
 router.post('/login', login); //2 Route login
 router.post('/register', register);//3 Route register
 router.post('/user/child', newChild);//7 Route new child
+router.delete('/user/child', deleteChild);//8 Route new child
 
 //router.get('*', async(ctx: RouterContext) => console.log(true));//Page error.html
 
