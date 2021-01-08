@@ -13,6 +13,7 @@ export type userUpdateTypes =
     attempt? : number,
     subscription ? : number,
     token?: string | null
+    childsTab?: Array<any>;
 }
     
 

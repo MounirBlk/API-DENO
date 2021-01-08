@@ -17,12 +17,13 @@ export default interface UserInterfaces {
     updateAt?: Date;
     attempt: number;
     token?: string | null;
+    childsTab: Array<any>;
 
     // getAge(): Number;
     // fullName(): string;
     insert(): Promise < void > ;
     update(update:userUpdateTypes): Promise < any > ;
-    delete(): Promise < any > ;
+    delete(objectCount: Object): Promise < any > ;
 }
 
 

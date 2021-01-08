@@ -8,11 +8,13 @@ export class UserDB{
         this.userdb = db.collection<UserInterfaces>("users");
     }
     
-    async selectUser(email: string):Promise <UserInterfaces>{
-        return await this.userdb.findOne({ email: email.trim().toLowerCase() })
+    async selectUser(objectFind: Object):Promise <UserInterfaces>{
+        return await this.userdb.findOne(objectFind)
     }
-
-    delete(): Promise < any > {
-        throw new Error('Method not implemented.');
+    async count(objectCount: Object):Promise <number>{
+        return await this.userdb.count(objectCount)
+    }
+    async delete(objectCount: Object):Promise <any>{
+        return await this.userdb.deleteOne(objectCount)
     }
 }

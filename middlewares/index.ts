@@ -42,12 +42,19 @@ const sendReturn = (ctx: RouterContext, status: number = 500, data: any = { erro
 
 /**
  *  Function qui supprime les données return initule
+ *  @param {Object} user Utilisateur
+ *  @param {string} mapperNameRoute Nom de la route
  */ 
-const deleteUserMapper = (data: any): any => {
-    delete data._id;
-    delete data.password;
-    delete data.attempt;
-    return data;
+const deleteMapper = (user: any, mapperNameRoute: string): any => {
+    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user._id : null;
+    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.password : null;
+    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.attempt : null;
+    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.token : null;
+    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.childsTab : null;
+    mapperNameRoute === 'newChild' ? delete user.userdb : null;
+    mapperNameRoute === 'newChild' ? delete user.id : null;
+    user = mapperNameRoute === 'newChild' ? renameKey(user, '_role', 'role') : user;
+    return user;
 }
 
 /**
@@ -116,7 +123,7 @@ const zipFormat = (data: string): Boolean => {
  *  Function vérification de si le text est dans le bon format
  */ 
 const textFormat = (data: string): Boolean => {
-    let regexText = /^[^@"()!_$*€£`+=;?#]+$/ // regex:  /^[^@&"()!_$*€£`+=\/;?#]+$/
+    let regexText = /^[^@"()/!_$*€£`+=;?#]+$/ // regex:  /^[^@&"()!_$*€£`+=\/;?#]+$/
     if (data.match(regexText) == null)
         return false
     else
@@ -142,6 +149,27 @@ const floatFormat = (data: string): Boolean => {
     if (data.match(regexFloat) == null)
         return false
     else
-        return true}
-        
-export { dataRequest, sendReturn, deleteUserMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
+        return true
+}
+
+/**
+ *  Function vérification si le mdp possede 6 caracteres min
+ */ 
+const isValidPassword = (password: string): boolean => {
+    return password.length >= 6 ? true : false;
+}
+
+/**
+ *  Function change le nom de la cle d'un objet
+ */
+const renameKey = (object: any, key: any, newKey: any) => {
+    const clonedObj = clone(object);
+    const targetKey = clonedObj[key];
+    delete clonedObj[key];
+    clonedObj[newKey] = targetKey;
+    return clonedObj;
+};
+
+const clone = (obj: any) => Object.assign({}, obj);
+
+export { dataRequest, sendReturn, isValidPassword, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat};
