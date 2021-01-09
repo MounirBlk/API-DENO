@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, sendReturn } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, isValidPassword, sendReturn, textFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -7,6 +7,8 @@ import { UserDB } from "../db/userDB.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { config } from '../config/config.ts';
 import { getAuthToken } from "../helpers/jwt.helpers.ts";
+import DateException from "../exceptions/DateException.ts";
+import EmailException from "../exceptions/EmailException.ts";
 
 /**
  *  Route login user
@@ -70,23 +72,32 @@ const login = async (ctx: RouterContext) => {
 /**
  *  Route inscription
  */ 
-        const register = async (ctx: RouterContext) => {
-            const data = await dataRequest(ctx)
-            // const dbCollection =  new UserDB();
-            // const user = await dbCollection.selectUser()
-            // if (user == data.email){ 
-            //     return sendReturn(ctx, 400, { error: true, message: 'adresse mail exist déjà'}) 
-            // }
-
-          if(exist(data.email) == false || exist(data.Password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.dateNaissance) == false|| exist(data.sexe) == false ){
-                return sendReturn(ctx, 400, { error: true, message: 'champ manquant'})
+const register = async (ctx: RouterContext) => {
+    const data = await dataRequest(ctx)
+    
+    if(exist(data.email) == false || exist(data.password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.date_naissance) == false|| exist(data.sexe) == false ){
+        return sendReturn(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoir sont manquantes"})
+    }else{
+        if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPassword(data.password) ||
+        (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
+            return sendReturn(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})   
+        }else{
+            const dbCollection = new UserDB;
+            if(await dbCollection.count({email: data.email.trim().toLowerCase()}) !== 0){
+                return sendReturn(ctx, 409, { error: true, message: "Un compte utilisant cette adresse mail est déjà enregistré"})  
             }else{
-                //insertion dans la base de données 
-                let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.dateNaissance, data.sexe, data.attempt, data.subscription);
-                await utilisateur.insert();
-                console.log(utilisateur);
+                
+                if(!EmailException.isValidEmail(data.email) || !isValidPassword(data.password)){
+                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})  
+                }else{ 
+                    //insertion dans la base de données 
+                    let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
+                    await utilisateur.insert(); 
+                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès"})   
+               }
             }
-     
+        }
+    }   
  }
 
 export { login, register};
