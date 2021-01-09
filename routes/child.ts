@@ -28,7 +28,7 @@ const newChild = async (ctx: RouterContext) => {
         return sendReturn(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
     }else{
         if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPassword(data.password) ||
-        (data.sexe !== "Homme" && data.sexe !== "Femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
+        (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{
             const dbCollectionTestEmail = new UserDB();

@@ -51,6 +51,11 @@ const deleteMapper = (user: any, mapperNameRoute: string): any => {
     mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.attempt : null;
     mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.token : null;
     mapperNameRoute === 'login' || mapperNameRoute === 'newChild' ? delete user.childsTab : null;
+
+    mapperNameRoute === 'register' || mapperNameRoute === 'newChild' ? delete user._id : null;
+    mapperNameRoute === 'register' || mapperNameRoute === 'newChild' ? delete user.password : null; 
+
+    
     mapperNameRoute === 'newChild' ? delete user.userdb : null;
     mapperNameRoute === 'newChild' ? delete user.id : null;
     user = mapperNameRoute === 'newChild' ? renameKey(user, '_role', 'role') : user;
