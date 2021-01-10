@@ -18,7 +18,7 @@ import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 const newChild = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-    if (payloadToken === null || payloadToken === undefined || payloadToken.role.toLowerCase() !== 'tuteur') return sendReturn(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+    if (payloadToken === null || payloadToken === undefined || payloadToken.role.toLowerCase() !== 'tuteur') return sendReturn(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})//verification à confirmer pour le test du token
     // Vérification de si les données sont bien présentes dans le body
     let error: boolean = false;
     if(data === undefined || data === null) return sendReturn(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
@@ -79,7 +79,7 @@ const deleteChild = async (ctx: RouterContext) => {
             return sendReturn(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         } else{
             const dbCollectionChildExist = new UserDB();
-            if (data == undefined || data == null || await dbCollectionChildExist.selectUser({ _id: new Bson.ObjectId(data.id) }) === undefined) return sendReturn(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
+            if (data == undefined || data == null || !exist(data.id) || data.id.length !== 24 || await dbCollectionChildExist.count({ _id: new Bson.ObjectId(data.id) }) === 0) return sendReturn(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
             const dbCollection = new UserDB();
             let userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
             if(userParent !== undefined && userParent !== null){
@@ -99,4 +99,24 @@ const deleteChild = async (ctx: RouterContext) => {
     }
 }
 
-export { newChild, deleteChild };
+/**
+ *  Route recuperations tous les childs d'un parent
+ *  @param {RouterContext} ctx 
+ */ 
+const getChilds = async (ctx: RouterContext) => {
+    //const data = await dataRequest(ctx);
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined) return sendReturn(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
+    if(!exist(payloadToken.id) || !exist(payloadToken.email)){
+        return sendReturn(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
+    }else{
+        if (payloadToken.role.toLowerCase() !== 'tuteur') return sendReturn(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+        if(payloadToken.id.toString().length !== 24 || !EmailException.isValidEmail(payloadToken.email)){// .toString() n'est pas nécessaire
+            return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
+        }else{
+            return sendReturn(ctx, 200, { error: false, users: payloadToken })
+        }
+    }
+}
+
+export { newChild, deleteChild, getChilds };

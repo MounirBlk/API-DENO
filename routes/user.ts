@@ -17,8 +17,8 @@ import EmailException from "../exceptions/EmailException.ts";
 const login = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     // Vérification de si les données sont bien présentes dans le body
-    if(data === undefined || data === null) return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
-    if(exist(data.Email) == false || exist(data.Password) == false){
+    //if(data === undefined || data === null) return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
+    if(data === undefined || data === null || exist(data.Email) == false || exist(data.Password) == false){
         return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
     }else{
         //const user: any = await db.collection('users').findOne({ email: Email.trim().toLowerCase() })
@@ -73,10 +73,9 @@ const login = async (ctx: RouterContext) => {
  *  Route inscription
  */ 
 const register = async (ctx: RouterContext) => {
-    const data = await dataRequest(ctx)
-    
-    if(exist(data.email) == false || exist(data.password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.date_naissance) == false|| exist(data.sexe) == false ){
-        return sendReturn(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoir sont manquantes"})
+    const data = await dataRequest(ctx);
+    if(data === undefined || data === null || exist(data.email) == false || exist(data.password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.date_naissance) == false|| exist(data.sexe) == false ){
+        return sendReturn(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})
     }else{
         if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPassword(data.password) ||
         (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
@@ -86,18 +85,17 @@ const register = async (ctx: RouterContext) => {
             if(await dbCollection.count({email: data.email.trim().toLowerCase()}) !== 0){
                 return sendReturn(ctx, 409, { error: true, message: "Un compte utilisant cette adresse mail est déjà enregistré"})  
             }else{
-                
                 if(!EmailException.isValidEmail(data.email) || !isValidPassword(data.password)){
-                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'})  
+                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'}) //cette erreur n'apparaitra jamais
                 }else{ 
                     //insertion dans la base de données 
                     let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
                     await utilisateur.insert(); 
                     return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès"})   
-               }
+                }
             }
         }
     }   
- }
+}
 
 export { login, register};
