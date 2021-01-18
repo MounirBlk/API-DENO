@@ -14,7 +14,10 @@ export class UserDB{
     async count(objectCount: Object):Promise <number>{
         return await this.userdb.count(objectCount)
     }
-    async delete(objectCount: Object):Promise <any>{
-        return await this.userdb.deleteOne(objectCount)
+    async delete(objectForRemove: Object):Promise <any>{
+        return await this.userdb.deleteOne(objectForRemove)
+    }
+    async selectAllUsers(objectSelectAll: Object):Promise <any>{
+        return await this.userdb.find(objectSelectAll)
     }
 }
