@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, isValidPassword, sendReturn, textFormat } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPassword, sendReturn, textFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -114,7 +114,8 @@ const getChilds = async (ctx: RouterContext) => {
         if(payloadToken.id.toString().length !== 24 || !EmailException.isValidEmail(payloadToken.email)){// .toString() n'est pas nécessaire
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{
-            return sendReturn(ctx, 200, { error: false, users: payloadToken })
+            let childs: any = await getChildsByParent(payloadToken.id)//return les enfants d'un parent en fonction de l'id parent
+            return sendReturn(ctx, 200, { error: false, users: childs })
         }
     }
 }
