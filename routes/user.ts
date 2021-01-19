@@ -6,7 +6,7 @@ import { comparePass } from "../helpers/password.helpers.ts";
 import { UserDB } from "../db/userDB.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { config } from '../config/config.ts';
-import { getAuthToken } from "../helpers/jwt.helpers.ts";
+import { getAuthToken, getJwtPayload } from "../helpers/jwt.helpers.ts";
 import DateException from "../exceptions/DateException.ts";
 import EmailException from "../exceptions/EmailException.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
@@ -72,6 +72,7 @@ const login = async (ctx: RouterContext) => {
 
 /**
  *  Route inscription
+ *  @param {RouterContext} ctx
  */ 
 const register = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
@@ -99,5 +100,19 @@ const register = async (ctx: RouterContext) => {
         }
     }   
 }
+/**
+ *  Route delete user
+ *  @param {RouterContext} ctx
+ */ 
+const deleteUser = async (ctx: RouterContext) => {
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined) return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+    if(!exist(payloadToken.id) || !exist(payloadToken.email)){
+        return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+    }else{
+        await new UserDB().delete({ _id: new Bson.ObjectId(payloadToken.id) })
+        return sendReturn(ctx, 200, { error: false, message: 'Votre compte a été supprimée avec succès' })
+    }
+}
 
-export { login, register};
+export { login, register, deleteUser};
