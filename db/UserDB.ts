@@ -18,6 +18,6 @@ export class UserDB{
         return await this.userdb.deleteOne(objectForRemove)
     }
     async selectAllUsers(objectSelectAll: Object):Promise <any>{
-        return await this.userdb.find(objectSelectAll)
+        return await this.userdb.find(objectSelectAll).toArray()
     }
 }
