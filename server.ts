@@ -2,7 +2,7 @@ import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
 import { deleteChild, getChilds, newChild } from "./routes/child.ts";
-import { login, register } from "./routes/user.ts";
+import { login, register, updateutil } from "./routes/user.ts";
 
 const app = new Application();
 const router = new Router();
@@ -26,6 +26,9 @@ router.post('/register', register);//3 Route register
 router.post('/user/child', newChild);//7 Route new child
 router.delete('/user/child', deleteChild);//8 Route delete child
 router.get('/user/child', getChilds);//9 Route recuperations tous les childs d'un parent
+router.put('/user', updateutil);//5 update données utilisateur
+
+
 
 //router.get('*', async(ctx: RouterContext) => console.log(true));//Page error.html
 
