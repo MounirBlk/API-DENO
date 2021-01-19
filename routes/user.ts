@@ -114,5 +114,37 @@ const deleteUser = async (ctx: RouterContext) => {
         return sendReturn(ctx, 200, { error: false, message: 'Votre compte a été supprimée avec succès' })
     }
 }
+/**
+ *  Route modification
+ *  @param {RouterContext} ctx
+ */ 
+const updateutil = async (ctx: RouterContext) => {
+    const data = await dataRequest(ctx);    
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined) 
+        {return sendReturn(ctx, 400, { error: true, message: "Votre token n'est pas correct"})
+    }else{
+        if(data===null||data===undefined){
+            return sendReturn(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
+        }else{ 
+            const dbCollection = new UserDB();
+            let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+            let toUpdate={firstname:'', lastname:'', dateNaissance:'', sexe:''}
+            let isError=false;
+            toUpdate.firstname = exist(data.firstname) ? !textFormat(data.firstname)?(isError = true):data.firstname : user.firstname;
+            toUpdate.lastname = exist(data.lastname) ? !textFormat(data.lastname)?(isError = true):data.lastname : user.lastname;
+            toUpdate.dateNaissance = exist(data.date_naissance) ? !DateException.isValidDate(data.date_naissance)?(isError = true):data.date_naissance : user.dateNaissance;
+            toUpdate.sexe = exist(data.sexe) ? (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme")?(isError = true):data.sexe : user.sexe;
+            if(isError){
+                return sendReturn(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronnées"})
+            }else{
+                let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
+                utilisateur.setId(<{ $oid: string}>user._id)
+                utilisateur.update(toUpdate)
+                return sendReturn(ctx, 200, { error: false, message: "Vos données ont été mises à jour"}) 
+            }  
+        }
+    }
+}
 
-export { login, register, deleteUser};
+export { login, register, deleteUser, updateutil};

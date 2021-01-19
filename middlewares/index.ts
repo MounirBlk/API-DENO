@@ -189,10 +189,10 @@ const getChildsByParent = async(payloadTokenID: any): Promise< Array<any> > => {
     const dbColParent = new UserDB();
     let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
     let childs: Array<any> = [];
-    /*userParent.childsTab.forEach(async(element) => {
-        let child = await new UserDB().selectUser({ _id: new Bson.ObjectId(element) })
-        childs.push(child)
-    });*/
+    // userParent.childsTab.forEach(async(element) => {
+    //     let child = await new UserDB().selectUser({ _id: new Bson.ObjectId(element) })
+    //     childs.push(child)
+    // });
     if(userParent.childsTab.length === 1){
         let childOne = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[0]) })
         childs.push(deleteMapper(childOne, 'getChilds'))
