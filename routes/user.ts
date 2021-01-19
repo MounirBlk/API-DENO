@@ -118,7 +118,7 @@ const deleteUser = async (ctx: RouterContext) => {
  *  Route modification
  *  @param {RouterContext} ctx
  */ 
-const updateutil = async (ctx: RouterContext) => {
+const updateUtil = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);    
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
     if(payloadToken === null || payloadToken === undefined) 
@@ -147,4 +147,4 @@ const updateutil = async (ctx: RouterContext) => {
     }
 }
 
-export { login, register, deleteUser, updateutil};
+export { login, register, deleteUser, updateUtil};
