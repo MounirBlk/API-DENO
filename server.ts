@@ -1,6 +1,7 @@
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
+import { staticFileMiddleware } from "./middlewares/staticFileMiddleware.ts";
 import { deleteChild, getChilds, newChild } from "./routes/child.ts";
 import { deleteUser, login, register, updateUtil } from "./routes/user.ts";
 
@@ -11,21 +12,7 @@ const port = 8000;
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-// Send static content index.html
-app.use(async (ctx, next) => {
-    //await next();
-    await ctx.send({
-        root: `${Deno.cwd()}/public`,
-        index: "index.html",
-    });
-});
-/*app.use(async ({ response }: { response: any }) => {
-    const pathErrorFile: string = `${Deno.cwd()}/public/error.html`;
-    const imageBuf: any = await Deno.readFile(pathErrorFile);
-    response.body = imageBuf;
-    response.headers.set('Content-Type', 'text/html');
-})*/
-
+app.use(staticFileMiddleware);//1 Send static content index.html and error.html
 router.post('/login', login); //2 Route login
 router.post('/register', register);//3 Route register
 router.post('/user/child', newChild);//7 Route new child
