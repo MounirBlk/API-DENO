@@ -4,7 +4,6 @@ import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 export default interface UserInterfaces {
 
     _id: { $oid: string }|null|string;
-
     email: string;
     password: string;
     lastname: string;
