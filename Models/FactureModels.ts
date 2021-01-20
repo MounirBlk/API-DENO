@@ -14,7 +14,7 @@ export class FactureModels extends FactureDB implements FactureInterfaces {
     updateAt?: Date;
     idUser: { $oid: string } | string | null;
 
-    constructor(id_Stripe: string, date_payment: Date, montant_ht: string, montant_ttc: string, source: string, idUser: string) {
+    constructor(id_Stripe: string, date_payment: Date, montant_ht: string, montant_ttc: string, source: string, idUser: { $oid: string } | string | null) {
         super();
         this.id_Stripe = id_Stripe;
         this.date_payment = date_payment; // new Date()
