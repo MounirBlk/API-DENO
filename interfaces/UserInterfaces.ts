@@ -20,7 +20,7 @@ export default interface UserInterfaces {
 
     // getAge(): Number;
     // fullName(): string;
-    insert(): Promise < void > ;
+    insert(): Promise < any > ;
     update(update:userUpdateTypes): Promise < any > ;
     delete(objectCount: Object): Promise < any > ;
 }
