@@ -4,9 +4,9 @@ import FactureInterfaces from "../interfaces/FactureInterfaces.ts";
 export class FactureModels extends FactureDB implements FactureInterfaces {
     [x: string]: any;
     private id: { $oid: string } | null = null;
-    
+
     id_Stripe: string;
-    date_payement: Date;// string ?
+    date_payment: Date;// string ?
     montant_ht: string;
     montant_ttc: string;
     source: string;
@@ -14,10 +14,10 @@ export class FactureModels extends FactureDB implements FactureInterfaces {
     updateAt: Date;
     idUser: { $oid: string } | string | null;
 
-    constructor(id_Stripe: string, date_payement: Date, montant_ht: string, montant_ttc: string, source: string, idUser: string) {
+    constructor(id_Stripe: string, date_payment: Date, montant_ht: string, montant_ttc: string, source: string, idUser: string) {
         super();
         this.id_Stripe = id_Stripe;
-        this.date_payement = date_payement; // new Date()
+        this.date_payment = date_payment; // new Date()
         this.montant_ht = montant_ht;
         this.montant_ttc = montant_ttc;
         this.source = source;
@@ -37,7 +37,7 @@ export class FactureModels extends FactureDB implements FactureInterfaces {
     async insert(): Promise < any > {
         this.id = await this.facturedb.insertOne({
             id_Stripe : this.id_Stripe,
-            date_payement : this.date_payement,
+            date_payment : this.date_payment,
             montant_ht : this.montant_ht,
             montant_ttc : this.montant_ttc,
             source : this.source,
