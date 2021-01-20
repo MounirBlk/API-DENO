@@ -6,7 +6,7 @@ export default interface FactureInterfaces {
     montant_ht: string;
     montant_ttc: string;
     source: string;
-    createdAt: Date;
-    updateAt: Date;
+    createdAt?: Date;
+    updateAt?: Date;
     idUser: { $oid: string } | string | null;
 }

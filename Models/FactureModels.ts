@@ -10,8 +10,8 @@ export class FactureModels extends FactureDB implements FactureInterfaces {
     montant_ht: string;
     montant_ttc: string;
     source: string;
-    createdAt: Date;
-    updateAt: Date;
+    createdAt?: Date;
+    updateAt?: Date;
     idUser: { $oid: string } | string | null;
 
     constructor(id_Stripe: string, date_payment: Date, montant_ht: string, montant_ttc: string, source: string, idUser: string) {
