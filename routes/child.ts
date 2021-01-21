@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPassword, sendReturn, textFormat } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, sendReturn, textFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -27,7 +27,7 @@ const newChild = async (ctx: RouterContext) => {
     if(error){
         return sendReturn(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
     }else{
-        if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPassword(data.password) ||
+        if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPasswordLength(data.password) ||
         (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{

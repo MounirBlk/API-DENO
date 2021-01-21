@@ -158,7 +158,7 @@ const floatFormat = (data: string): Boolean => {
 /**
  *  Function vérification si le mdp possede 6 caracteres min
  */ 
-const isValidPassword = (password: string): boolean => {
+const isValidPasswordLength = (password: string): boolean => {
     return password.length >= 6 ? true : false;
 }
 
@@ -173,7 +173,17 @@ const renameKey = (object: any, key: any, newKey: any) => {
     return clonedObj;
 };
 
+/**
+ * Clone pour le rename de la key
+ */
 const clone = (obj: any) => Object.assign({}, obj);
+
+/**
+ *  Function vérification de la taille min et max d'une variable
+ */ 
+const isValidLength = (text: string, min: number, max: number): boolean => {
+    return text.length >= min && text.length <= max ? true : false;
+}
 
 /**
  * Function qui retourne les enfants d'un parent
@@ -191,4 +201,4 @@ const getChildsByParent = async(payloadTokenID: any): Promise< Array<UserInterfa
     return childs;
 }
 
-export { dataRequest, sendReturn, isValidPassword, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+export { dataRequest, sendReturn, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};

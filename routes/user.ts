@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, isValidPassword, sendReturn, textFormat } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, isValidPasswordLength, sendReturn, textFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { create, getNumericDate } from "https://deno.land/x/djwt@v2.0/mod.ts";//download
@@ -79,7 +79,7 @@ const register = async (ctx: RouterContext) => {
     if(data === undefined || data === null || exist(data.email) == false || exist(data.password) == false || exist(data.lastname) == false || exist(data.firstname) == false || exist(data.date_naissance) == false|| exist(data.sexe) == false ){
         return sendReturn(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})
     }else{
-        if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPassword(data.password) ||
+        if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !isValidPasswordLength(data.password) ||
         (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
             return sendReturn(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})   
         }else{
@@ -87,7 +87,7 @@ const register = async (ctx: RouterContext) => {
             if(await dbCollection.count({email: data.email.trim().toLowerCase()}) !== 0){
                 return sendReturn(ctx, 409, { error: true, message: "Un compte utilisant cette adresse mail est déjà enregistré"})  
             }else{
-                if(!EmailException.isValidEmail(data.email) || !isValidPassword(data.password)){
+                if(!EmailException.isValidEmail(data.email) || !isValidPasswordLength(data.password)){
                     return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'}) //cette erreur n'apparaitra jamais
                 }else{ 
                     //insertion dans la base de données 
