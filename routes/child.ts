@@ -42,7 +42,7 @@ const newChild = async (ctx: RouterContext) => {
                 if (tabChilds.length >= 3){
                     return sendReturn(ctx, 409, { error: true, message: 'Vous avez dépassé le cota de trois enfants'})  
                 }else{
-                    let utilisateurChild = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 1);
+                    let utilisateurChild = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, userParent.subscription);
                     utilisateurChild.setRole('enfant')
                     const idChild = await utilisateurChild.insert();
                     let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
@@ -115,7 +115,7 @@ const getChilds = async (ctx: RouterContext) => {
             return sendReturn(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
         }else{
             let childs: any = await getChildsByParent(payloadToken.id)//return les enfants d'un parent en fonction de l'id parent
-            return sendReturn(ctx, 200, { error: false, users: childs })
+            return sendReturn(ctx, 200, { error: false, users: childs.map((item: UserInterfaces) => deleteMapper(item)) })
         }
     }
 }

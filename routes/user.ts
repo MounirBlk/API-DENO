@@ -39,7 +39,7 @@ const login = async (ctx: RouterContext) => {
                     utilisateur.setId(<{ $oid: string }>user._id);
                     let isSuccess = await utilisateur.update(user);
                     if(isSuccess || isSuccess === 1)
-                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteMapper(user, 'login'), token: jwtToken})
+                        return sendReturn(ctx, 200, { error: false, message: "L'utilisateur a été authentifié succès" , user: deleteMapper(user), token: jwtToken})
                     else
                         return sendReturn(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                 }
@@ -94,7 +94,7 @@ const register = async (ctx: RouterContext) => {
                     let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
                     const utilisateurId = await utilisateur.insert();
                     const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
-                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user, 'register')})   
+                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user)})   
                 }
             }
         }

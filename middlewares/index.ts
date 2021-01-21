@@ -1,6 +1,7 @@
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
+import UserInterfaces from "../interfaces/UserInterfaces.ts";
 
 /**
  * Function qui fait un retourne les données envoyéss
@@ -45,16 +46,9 @@ const sendReturn = (ctx: RouterContext, status: number = 500, data: any = { erro
 /**
  *  Function qui supprime les données return initule
  *  @param {Object} user Utilisateur
- *  @param {string} mapperNameRoute Nom de la route
+ *  @param {string} mapperNameRoute? Nom de la route
  */ 
-const deleteMapper = (user: any, mapperNameRoute: string): any => {
-    /*mapperNameRoute === 'login' || mapperNameRoute === 'newChild' || mapperNameRoute === 'getChilds' || mapperNameRoute === 'register' ? delete user._id : null;
-    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' || mapperNameRoute === 'getChilds' || mapperNameRoute === 'register' ? delete user.password : null;
-    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' || mapperNameRoute === 'getChilds' ? delete user.attempt : null;
-    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' || mapperNameRoute === 'getChilds'? delete user.token : null;
-    mapperNameRoute === 'login' || mapperNameRoute === 'newChild' || mapperNameRoute === 'getChilds' ? delete user.childsTab : null;    
-    mapperNameRoute === 'newChild' ? delete user.userdb : null;
-    mapperNameRoute === 'newChild' ? delete user.id : null;*/
+const deleteMapper = (user: any, mapperNameRoute?: string): any => {
     delete user.id;
     delete user._id
     delete user.userdb;
@@ -189,27 +183,10 @@ const getChildsByParent = async(payloadTokenID: any): Promise< Array<any> > => {
     const dbColParent = new UserDB();
     let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
     let childs: Array<any> = [];
-    // userParent.childsTab.forEach(async(element) => {
-    //     let child = await new UserDB().selectUser({ _id: new Bson.ObjectId(element) })
-    //     childs.push(child)
-    // });
-    if(userParent.childsTab.length === 1){
-        let childOne = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[0]) })
-        childs.push(deleteMapper(childOne, 'getChilds'))
-    }else if(userParent.childsTab.length === 2){
-        let childOne = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[0]) })
-        let childTwo = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[1]) })
-        childs.push(deleteMapper(childOne, 'getChilds'))
-        childs.push(deleteMapper(childTwo, 'getChilds'))
-    }else if (userParent.childsTab.length === 3){
-        let childOne = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[0]) })
-        let childTwo = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[1]) })
-        let childThree = await new UserDB().selectUser({ _id: new Bson.ObjectId(userParent.childsTab[2]) })
-        childs.push(deleteMapper(childOne, 'getChilds'))
-        childs.push(deleteMapper(childTwo, 'getChilds'))
-        childs.push(deleteMapper(childThree, 'getChilds'))
-    }else{
-        childs = []
+    let child: UserInterfaces;
+    for (let i = 0; i < userParent.childsTab.length; i++){
+        child = await new UserDB().selectUser({ _id: userParent.childsTab[i] })
+        childs.push(child)
     }
     return childs;
 }
