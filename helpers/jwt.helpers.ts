@@ -3,6 +3,7 @@ import { config } from '../config/config.ts';
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { sendReturn } from "../middlewares/index.ts";
+import { UserDB } from "../db/userDB.ts";
 
 const {
     JWT_TOKEN_SECRET,
@@ -52,8 +53,12 @@ const getJwtPayload = async(ctx: RouterContext, tokenHeader: string | null): Pro
         if (tokenHeader) {
             const token = tokenHeader.replace(/^bearer/i, "").trim();
             const jwtObject = await verify(token, JWT_TOKEN_SECRET, header.alg);
-            if (jwtObject && jwtObject !== null && jwtObject !== undefined) {
-                return jwtObject;
+            if (await new UserDB().count({token: token}) === 0) {
+                return null;
+            }else{
+                if (jwtObject && jwtObject !== null && jwtObject !== undefined) {
+                    return jwtObject;
+                }
             }
         }
         return null;

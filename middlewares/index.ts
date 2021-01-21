@@ -179,10 +179,10 @@ const clone = (obj: any) => Object.assign({}, obj);
  * Function qui retourne les enfants d'un parent
  * @param {Bson.ObjectId} payloadToken.id id du parent
  */
-const getChildsByParent = async(payloadTokenID: any): Promise< Array<any> > => {
+const getChildsByParent = async(payloadTokenID: any): Promise< Array<UserInterfaces> > => {
     const dbColParent = new UserDB();
     let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
-    let childs: Array<any> = [];
+    let childs: Array<UserInterfaces> = [];
     let child: UserInterfaces;
     for (let i = 0; i < userParent.childsTab.length; i++){
         child = await new UserDB().selectUser({ _id: userParent.childsTab[i] })
