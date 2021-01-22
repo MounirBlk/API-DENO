@@ -104,11 +104,13 @@ const emailFormat = (data: string): Boolean => {
 }
 
 /**
- *  Function vérification password
+ *  Function vérification password (taille entre 7 et 20 caracteres)
  */ 
 const passwordFormat = (data: string): Boolean => {
-    let regexPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/
-    return data.match(regexPassword) == null || data === undefined ? false : true
+    //let regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{7,})/; //maj mini chiffre taille7
+    //let regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; //maj mini specialchar chiffre taille8 mini
+    let regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^-])[A-Za-z\d@$!%*?&#^-]{7,20}$/; //maj mini specialchar chiffre taille7_mini taille20_max
+    return (data.match(regexPassword) == null || data === undefined /*|| !isValidLength(data, 7, 20)*/) ? false : true
 }
 
 /**
@@ -123,14 +125,15 @@ const zipFormat = (data: string): Boolean => {
 }
 
 /**
- *  Function vérification de si le text est dans le bon format
+ *  Function vérification de si le text est dans le bon format (taille entre 2 et 25 caracteres)
  */ 
 const textFormat = (data: string): Boolean => {
     let regexText = /^[^@"()/!_$*€£`+=;?#]+$/ // regex:  /^[^@&"()!_$*€£`+=\/;?#]+$/
     if (data.match(regexText) == null)
         return false
     else
-        return true
+        return isValidLength(data, 2, 25) ? true : false
+    
 }
 
 /**
