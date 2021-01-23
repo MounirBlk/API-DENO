@@ -15,8 +15,8 @@ export class UserModels extends UserDB implements UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : number;
-    sexe: string;
+    subscription : number;
+    sexe: string = "Femme";
     createdAt?: Date;
     updateAt?: Date;
     attempt: number;

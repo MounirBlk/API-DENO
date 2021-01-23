@@ -23,7 +23,7 @@ const login = async (ctx: RouterContext) => {
         return sendReturn(ctx, 400, { error: true, message: 'Email/password manquants'})
     }else{
         //const user: any = await db.collection('users').findOne({ email: Email.trim().toLowerCase() })
-        if(!EmailException.isValidEmail(data.email) || !passwordFormat(data.password)){
+        if(!EmailException.isValidEmail(data.Email) || !passwordFormat(data.Password)){
             return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'});
         }else{
             const dbCollection =  new UserDB();
@@ -106,12 +106,16 @@ const register = async (ctx: RouterContext) => {
  */ 
 const deleteUser = async (ctx: RouterContext) => {
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-    if(payloadToken === null || payloadToken === undefined) return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
-    if(!exist(payloadToken.id) || !exist(payloadToken.email)){
+    if(payloadToken === null || payloadToken === undefined /*|| payloadToken.role !== 'Tuteur'*/){
         return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
-        await new UserDB().delete({ _id: new Bson.ObjectId(payloadToken.id) })
-        return sendReturn(ctx, 200, { error: false, message: 'Votre compte a été supprimée avec succès' })
+        const dbCollection = new UserDB();
+        let userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        for(let i = 0; i < userParent.childsTab.length; i++){
+            await new UserDB().delete({ _id: userParent.childsTab[i] })
+        }
+        await dbCollection.delete({ _id: new Bson.ObjectId(payloadToken.id) })
+        return sendReturn(ctx, 200, { error: false, message: 'Votre compte et le compte de vos enfants ont été supprimés avec succès' })
     }
 }
 /**
@@ -122,7 +126,7 @@ const updateUtil = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);    
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
     if(payloadToken === null || payloadToken === undefined) 
-        {return sendReturn(ctx, 400, { error: true, message: "Votre token n'est pas correct"})
+        {return sendReturn(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
         if(data===null||data===undefined){
             return sendReturn(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
@@ -130,11 +134,11 @@ const updateUtil = async (ctx: RouterContext) => {
             const dbCollection = new UserDB();
             let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
             let toUpdate={firstname:'', lastname:'', dateNaissance:'', sexe:''}
-            let isError=false;
-            toUpdate.firstname = exist(data.firstname) ? !textFormat(data.firstname)?(isError = true):data.firstname : user.firstname;
-            toUpdate.lastname = exist(data.lastname) ? !textFormat(data.lastname)?(isError = true):data.lastname : user.lastname;
-            toUpdate.dateNaissance = exist(data.date_naissance) ? !DateException.isValidDate(data.date_naissance)?(isError = true):data.date_naissance : user.dateNaissance;
-            toUpdate.sexe = exist(data.sexe) ? (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme")?(isError = true):data.sexe : user.sexe;
+            let isError = false;
+            toUpdate.firstname = exist(data.firstname) ? !textFormat(data.firstname) ? (isError = true) : data.firstname : user.firstname;
+            toUpdate.lastname = exist(data.lastname) ? !textFormat(data.lastname) ? (isError = true) : data.lastname : user.lastname;
+            toUpdate.dateNaissance = exist(data.date_naissance) ? !DateException.isValidDate(data.date_naissance) ? (isError = true) : data.date_naissance : user.dateNaissance;
+            toUpdate.sexe = exist(data.sexe) ? (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") ? (isError = true) : data.sexe : user.sexe;
             if(isError){
                 return sendReturn(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronnées"})
             }else{
