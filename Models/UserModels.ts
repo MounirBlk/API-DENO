@@ -7,7 +7,7 @@ import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 
 export class UserModels extends UserDB implements UserInterfaces {
     [x: string]: any;
-    private _role: roleTypes = "tuteur";
+    private _role: roleTypes = "Tuteur";
     private id:{ $oid: string }| null = null;
 
     email: string;
@@ -15,8 +15,8 @@ export class UserModels extends UserDB implements UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : number;
-    sexe: string;
+    subscription : number;
+    sexe: string = "Femme";
     createdAt?: Date;
     updateAt?: Date;
     attempt: number;
