@@ -45,19 +45,20 @@ const dataResponse = (ctx: RouterContext, status: number = 500, data: any = { er
 
 /**
  *  Function qui supprime les données return initule
- *  @param {Object} user Utilisateur
+ *  @param {Object} data Data
  *  @param {string} mapperNameRoute? Nom de la route
  */ 
-const deleteMapper = (user: any, mapperNameRoute?: string): any => {
-    delete user.id;
-    delete user._id
-    delete user.userdb;
-    delete user.password;
-    delete user.attempt;
-    delete user.token;
-    delete user.childsTab;
-    user = mapperNameRoute === 'newChild' ? renameKey(user, '_role', 'role') : user;
-    return user;
+const deleteMapper = (data: any, mapperNameRoute?: string): any => {
+    mapperNameRoute !== 'getBills' ? delete data.id : null
+    delete data._id
+    delete data.userdb;
+    delete data.password;
+    delete data.attempt;
+    delete data.token;
+    delete data.childsTab;
+    delete data.idUser;
+    data = mapperNameRoute === 'newChild' ? renameKey(data, '_role', 'role') : data;
+    return data;
 }
 
 /**

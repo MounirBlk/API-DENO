@@ -1,12 +1,13 @@
-export default interface FactureInterfaces {
+export default interface SongInterfaces {
 
-    _id: { $oid: string }|null|string;
+    //_id: { $oid: string }|null|string;
+    id?: number;
     name: string;
     url: string;
     cover: string;
     time: string;
-    createdAt: Date;
-    updateAt: Date;
     type: string;
+    createdAt?: Date;
+    updateAt?: Date;
     //idUser: { $oid: string } | string | null;
 }
