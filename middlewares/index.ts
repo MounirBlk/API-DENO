@@ -30,7 +30,7 @@ const dataRequest = async (ctx: RouterContext) => {
  * @param {Number} status 
  * @param {Object} data 
  */
-const sendReturn = (ctx: RouterContext, status: number = 500, data: any = { error: true, message: "Processing error" }) => {
+const dataResponse = (ctx: RouterContext, status: number = 500, data: any = { error: true, message: "Processing error" }) => {
     ctx.response.headers.append('Content-Type','application/json')
     try {
         ctx.response.status = status;
@@ -204,4 +204,4 @@ const getChildsByParent = async(payloadTokenID: any): Promise< Array<UserInterfa
     return childs;
 }
 
-export { dataRequest, sendReturn, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+export { dataRequest, dataResponse, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};

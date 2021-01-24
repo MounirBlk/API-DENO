@@ -2,7 +2,7 @@ import { create, verify, decode, getNumericDate } from "https://deno.land/x/djwt
 import { config } from '../config/config.ts';
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
-import { sendReturn } from "../middlewares/index.ts";
+import { dataResponse } from "../middlewares/index.ts";
 import { UserDB } from "../db/userDB.ts";
 
 const {
@@ -12,7 +12,7 @@ const {
 } = config;
 
 const header: any = {
-    alg: "none",//HS256
+    alg: "HS256",//HS256 HS512 none
     typ: "JWT",
 };
 
