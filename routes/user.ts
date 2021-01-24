@@ -10,7 +10,7 @@ import { getAuthToken, getJwtPayload } from "../helpers/jwt.helpers.ts";
 import DateException from "../exceptions/DateException.ts";
 import EmailException from "../exceptions/EmailException.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
-
+import {sendMail} from "../helpers/mail.ts"
 /**
  *  Route login user
  *  @param {RouterContext} ctx 
@@ -94,7 +94,8 @@ const register = async (ctx: RouterContext) => {
                     let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
                     const utilisateurId = await utilisateur.insert();
                     const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
-                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user, 'register')})   
+                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user, 'register')}), sendMail(data.email) 
+                    
                 }
             }
         }

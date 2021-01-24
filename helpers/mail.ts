@@ -4,7 +4,7 @@ import {exist} from "../middlewares/index.ts";
 import { getRandomFilename } from "https://deno.land/x/oak@v6.4.1/util.ts";
 
 
-const sendMail = async (email:string): Promise <void>=>{ 
+const sendMail = async (email:any): Promise <void>=>{ 
 const client = new SmtpClient(); 
   await client.connectTLS({
     hostname: "smtp.gmail.com",
@@ -16,9 +16,9 @@ const client = new SmtpClient();
     from: exist(<string>Deno.env.get("SEND_EMAIL")) ? <string>Deno.env.get("SEND_EMAIL"): "exemple@gmail.com",
     to: email,
     subject: "Welcome!",
-    content: "Hi from Vuelancer!",
+    content: " bienvenue sur deno radio feed!",
   });
   await client.close();
 }
 
-sendMail('email@test.com');
+export {sendMail}
