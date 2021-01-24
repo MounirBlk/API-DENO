@@ -12,7 +12,7 @@ const {
 } = config;
 
 const header: any = {
-    alg: "HS256",
+    alg: "none",//HS256
     typ: "JWT",
 };
 
