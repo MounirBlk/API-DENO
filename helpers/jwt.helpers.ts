@@ -61,7 +61,7 @@ const getJwtPayload = async(ctx: RouterContext, tokenHeader: string | null): Pro
                     }
                 }
             }else{
-                return false;
+                return null;//false pour erreur conformité
             }
         }
         return null;
@@ -74,20 +74,20 @@ const getJwtPayload = async(ctx: RouterContext, tokenHeader: string | null): Pro
 const getFullToken = (payloadToken: string, alg: string): string => {
     let headerToken: string = '';
     let signatureToken: string = '';
-    if(alg.toLowerCase() === 'none' || alg === 'NONE'){
-        headerToken = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0'.concat('.')
-        signatureToken = '.'.concat('')
+    if(alg.toLowerCase() === 'none' || alg === 'NONE'){//header du token avec l'algorithme a none
+        headerToken = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0'.concat('.');
+        signatureToken = '.'.concat('');
     }
 
-    if(alg.toLowerCase() === 'hs256' || alg === 'HS256'){
-        headerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'.concat('.')
-        signatureToken = '.'.concat('r40HdLifzra_N1Y_gNvbv4T5UNK56uJwHE-uQNEXGW4')
-    }
+    //if(alg.toLowerCase() === 'hs256' || alg === 'HS256'){
+    //    headerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'.concat('.')
+    //    signatureToken = '.'.concat('r40HdLifzra_N1Y_gNvbv4T5UNK56uJwHE-uQNEXGW4')
+    //}
 
-    if(alg.toLowerCase() === 'hs512' || alg === 'HS512'){
-        headerToken = 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9'.concat('.')
-        signatureToken = '.'.concat('dYOHvldvbFoaO2_dCgQV7-rw2MwzQ1-pMoYxFp3j5L9HKulAp2ysSYWnxb7OoF5cDoXBDfS3NNVR5vH_2CNpHw')
-    }
+    //if(alg.toLowerCase() === 'hs512' || alg === 'HS512'){
+    //    headerToken = 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9'.concat('.')
+    //    signatureToken = '.'.concat('dYOHvldvbFoaO2_dCgQV7-rw2MwzQ1-pMoYxFp3j5L9HKulAp2ysSYWnxb7OoF5cDoXBDfS3NNVR5vH_2CNpHw')
+    //}
     const fullToken: string = headerToken + payloadToken + signatureToken;
     return fullToken;
 }
