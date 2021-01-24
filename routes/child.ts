@@ -26,8 +26,11 @@ const newChild = async (ctx: RouterContext) => {
         return dataResponse(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
     }else{
         const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+        if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
         if (payloadToken === null || payloadToken === undefined ) return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
-        if (payloadToken.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+        const dbCollection = new UserDB();
+        const userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         if(!EmailException.isValidEmail(data.email) || !DateException.isValidDate(data.date_naissance) || !passwordFormat(data.password) ||
         (data.sexe.toLowerCase() !== "homme" && data.sexe.toLowerCase() !== "femme") || !textFormat(data.firstname) || !textFormat(data.lastname)){
             return dataResponse(ctx, 409, { error: true, message: 'Une ou plusieurs données sont erronées'})
@@ -36,8 +39,6 @@ const newChild = async (ctx: RouterContext) => {
             if(await dbCollectionTestEmail.count({ email: data.email.trim().toLowerCase() }) !== 0){            
                 return dataResponse(ctx, 409, { error: true, message: 'Un compte utilisant cette adresse mail est déjà enregistré'})
             }else{
-                const dbCollection = new UserDB();
-                let userParent = await dbCollection.selectUser({_id: new Bson.ObjectId(payloadToken.id) })
                 let tabChilds: Array<any> = []
                 tabChilds = userParent.childsTab;
                 if (tabChilds.length >= 3){
@@ -53,12 +54,12 @@ const newChild = async (ctx: RouterContext) => {
                     if (!isValid || isValid === 0){
                         return dataResponse(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                     }else{
-                        let isSuccess = await utilisateurChild.update({token: await getAuthToken(utilisateurChild, idChild)})
-                        if(isSuccess || isSuccess === 1){
-                            return dataResponse(ctx, 201, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateurChild, 'newChild')})//Mapper to perform pour l'ordre du role
-                        }else{
-                            return dataResponse(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
-                        }
+                        //let isSuccess = await utilisateurChild.update({token: await getAuthToken(idChild)})
+                        //if(isSuccess || isSuccess === 1){
+                        return dataResponse(ctx, 201, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateurChild, 'newChild')})//Mapper to perform pour l'ordre du role
+                        //}else{
+                        //  return dataResponse(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
+                        //}
                     } 
                 }               
             }
@@ -73,17 +74,18 @@ const newChild = async (ctx: RouterContext) => {
 const deleteChild = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     } else{
-        if (payloadToken.role !== 'Tuteur'){
+        const dbCollection = new UserDB();
+        const userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        if (userParent.role !== 'Tuteur'){
             return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         } else{
             const dbCollectionChildExist = new UserDB();
             // verifier la condition du data.id.length
             if (data == undefined || data == null || !exist(data.id) || data.id.length !== 24 || await dbCollectionChildExist.count({ _id: new Bson.ObjectId(data.id) }) === 0) return dataResponse(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
-            const dbCollection = new UserDB();
-            let userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
             if(userParent !== undefined && userParent !== null){
                 if(userParent.childsTab.filter(item => item.toString() === data.id).length === 0 && userParent.childsTab.find(item => item.toString() === data.id) === undefined){
                     return dataResponse(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
@@ -108,13 +110,16 @@ const deleteChild = async (ctx: RouterContext) => {
 const getChilds = async (ctx: RouterContext) => {
     //const data = await dataRequest(ctx);
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: 'Votre token n\'est pas correct'})
     } else {
-        if (payloadToken.role !== 'Tuteur'){
+        const dbCollection = new UserDB();
+        const userParent = await dbCollection.selectUser({_id: new Bson.ObjectId(payloadToken.id) })
+        if (userParent.role !== 'Tuteur'){
             return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         } else {
-            let childs: any = await getChildsByParent(payloadToken.id)//return les enfants d'un parent en fonction de l'id parent
+            let childs: any = await getChildsByParent(userParent)//return les enfants d'un parent en fonction de userParent collection
             return dataResponse(ctx, 200, { error: false, users: childs.map((item: UserInterfaces) => deleteMapper(item)) })
         }
     }

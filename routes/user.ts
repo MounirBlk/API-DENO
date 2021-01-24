@@ -37,7 +37,7 @@ const login = async (ctx: RouterContext) => {
                     if(user.attempt >= 5 && ((<any>new Date() - <any>user.updateAt) / 1000 / 60) <= 2){
                         return dataResponse(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                     }else{
-                        const jwtToken = await getAuthToken(user, user._id);// génération du token
+                        const jwtToken = await getAuthToken(user._id);// génération du token
                         console.log(jwtToken.length)
                         user.token = jwtToken;
                         utilisateur.setId(<{ $oid: string }>user._id);
@@ -108,6 +108,7 @@ const register = async (ctx: RouterContext) => {
  */ 
 const deleteUser = async (ctx: RouterContext) => {
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined /*|| payloadToken.role !== 'Tuteur'*/){
         return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
@@ -127,6 +128,7 @@ const deleteUser = async (ctx: RouterContext) => {
 const updateUtil = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);    
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined) 
         {return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
