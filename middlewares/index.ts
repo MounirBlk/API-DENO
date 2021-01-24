@@ -192,9 +192,9 @@ const isValidLength = (text: string, min: number, max: number): boolean => {
  * Function qui retourne les enfants d'un parent
  * @param {Bson.ObjectId} payloadToken.id id du parent
  */
-const getChildsByParent = async(payloadTokenID: any): Promise< Array<UserInterfaces> > => {
-    const dbColParent = new UserDB();
-    let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
+const getChildsByParent = async(userParent: UserInterfaces): Promise< Array<UserInterfaces> > => {
+    //const dbColParent = new UserDB();
+    //let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
     let childs: Array<UserInterfaces> = [];
     let child: UserInterfaces;
     for (let i = 0; i < userParent.childsTab.length; i++){
@@ -204,4 +204,26 @@ const getChildsByParent = async(payloadTokenID: any): Promise< Array<UserInterfa
     return childs;
 }
 
-export { dataRequest, dataResponse, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ *  Function convertis une chaine de caracteres en binaire
+ */ 
+const textToBinary = (idString: any) => {
+    let result = "";
+    for (let i = 0; i < idString.length; i++) {
+        let bin = idString[i].charCodeAt().toString(2);
+        result += Array(8 - bin.length + 1).join("0") + bin;
+    } 
+    return result;
+}
+
+/**
+ *  Function convertis du binaire en chaine de caracteres
+ */ 
+const binaryToText = (idBinary: any) => {
+    let idString = idBinary.split(' ') //Split string in array of binary chars
+    .map((bin: any) => String.fromCharCode(parseInt(bin, 2))) //Map every binary char to real char
+    .join(''); //Join the array back to a string
+    return idString;
+}
+
+export { dataRequest, dataResponse, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
