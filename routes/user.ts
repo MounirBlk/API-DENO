@@ -91,18 +91,12 @@ const register = async (ctx: RouterContext) => {
             if(await dbCollection.count({email: data.email.trim().toLowerCase()}) !== 0){
                 return sendReturn(ctx, 409, { error: true, message: "Un compte utilisant cette adresse mail est déjà enregistré"})  
             }else{
-
-                if(!EmailException.isValidEmail(data.email) || !isValidPassword(data.password)){
-                    return sendReturn(ctx, 400, { error: true, message: 'Email/password incorrect'}) //cette erreur n'apparaitra jamais
-                }else{ 
-                    //insertion dans la base de données 
-                    let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
-                    const utilisateurId = await utilisateur.insert();
-                    const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
-                    return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user)}), sendMail(data.email) 
-                    
-                }
-
+                //insertion dans la base de données 
+                let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
+                const utilisateurId = await utilisateur.insert();
+                const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
+                await sendMail(data.email.trim().toLowerCase(), "Welcome!", "Bienvenue sur deno radio feed!")
+                return sendReturn(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user) })
             }
         }
     }   
