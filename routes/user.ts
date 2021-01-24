@@ -38,6 +38,7 @@ const login = async (ctx: RouterContext) => {
                         return sendReturn(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                     }else{
                         const jwtToken = await getAuthToken(user, user._id);// génération du token
+                        console.log(jwtToken.length)
                         user.token = jwtToken;
                         utilisateur.setId(<{ $oid: string }>user._id);
                         let isSuccess = await utilisateur.update(user);
@@ -152,4 +153,12 @@ const updateUtil = async (ctx: RouterContext) => {
     }
 }
 
-export { login, register, deleteUser, updateUtil};
+/**
+ *  Route deconnexion
+ *  @param {RouterContext} ctx
+ */ 
+const deconnexion = async (ctx: RouterContext) => {
+    const data = await dataRequest(ctx);
+}
+
+export { login, register, deleteUser, updateUtil, deconnexion};
