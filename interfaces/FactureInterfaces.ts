@@ -9,4 +9,6 @@ export default interface FactureInterfaces {
     createdAt?: Date;
     updateAt?: Date;
     idUser: { $oid: string } | string | null;
+
+    insert(): Promise < any > ;
 }
