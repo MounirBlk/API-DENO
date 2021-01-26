@@ -2,6 +2,7 @@ import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
+import type { float } from 'https://deno.land/x/etype/mod.ts';
 
 /**
  * Function qui fait un retourne les données envoyéss
@@ -227,4 +228,33 @@ const binaryToText = (idBinary: any) => {
     return idString;
 }
 
-export { dataRequest, dataResponse, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ *  Function qui return la date du jour à la seconde près aaaa/mm/jj hh:mm:ss
+ */ 
+const getCurrentDate = () => {
+    let dt = new Date();
+    return `${dt.getFullYear().toString().padStart(4, '0')}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`   
+}
+
+/**
+ *  Function random float min et max
+ */ 
+const randomFloat = (min: number | float , max: number | float) => Math.random() * (max - min) + min;
+
+/**
+ *  Function convert ht en ttc
+ */ 
+const calculHtToTtc = (montant_ht: number | float, tauxTva: number | float) => {
+    let montant_tva = montant_ht * tauxTva
+    let montant_ttc = montant_ht + montant_tva;
+    return montant_ttc;
+}
+
+/**
+ *  Function convert ttc en ht
+ */ 
+const calculTtcToHt = (montant_ttc: number | float, tauxTva: number | float) => {
+    return montant_ttc / (1 + tauxTva)
+}
+
+export { dataRequest, dataResponse, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
