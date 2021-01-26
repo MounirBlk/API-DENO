@@ -42,7 +42,7 @@ export const getBills = async (ctx: RouterContext) => {
     const dbCollection = new UserDB();
     const userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
     if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
-    await addBill(payloadToken.id) // ajout facture
+    //await addBill(payloadToken.id) // ajout facture
     const factures = await new FactureDB().selectAllFactures({ idUser : payloadToken.id });
     return dataResponse(ctx, 200, { error: false, bill: factures.map((item: FactureInterfaces) => deleteMapper(item, 'getBills'))})
 }
@@ -52,6 +52,6 @@ export const getBills = async (ctx: RouterContext) => {
  *  @param {any} id
  */ 
 const addBill = async (id: any) => {
-    const factures = new FactureModels('erjf22df','2022-05-17 17:52:21', 15.44, 25.25, id)
+    const factures = new FactureModels(v4.generate(),'2022-05-17 17:52:21', 15.44, 25.25, id)
     await factures.insert()
 }

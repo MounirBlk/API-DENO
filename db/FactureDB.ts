@@ -20,4 +20,12 @@ export class FactureDB{
     async selectAllFactures(objectSelectAll: Object):Promise <any>{
         return await this.facturedb.find(objectSelectAll).toArray()
     }
+    async getUniqId(): Promise <any>{
+        let allFactures = (await this.selectAllFactures({}))
+        let uniqId = 1;
+        for(let i = 0; i < allFactures.length; i++){
+            uniqId = (uniqId <= allFactures[i].idlol) ? (allFactures[i].idlol + 1) : uniqId
+        }
+        return uniqId;
+    }
 }
