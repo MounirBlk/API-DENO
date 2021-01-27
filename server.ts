@@ -1,6 +1,7 @@
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
+import { initFiles } from "./middlewares/index.ts";
 import { staticFileMiddleware } from "./middlewares/staticFileMiddleware.ts";
 import { deleteChild, getChilds, newChild } from "./routes/child.ts";
 import { addCard, getBills, subscription } from "./routes/facture.ts";
@@ -34,5 +35,7 @@ router.get('/bills', getBills);//14 Route recuperation des factures d'un parent
 // deno run --allow-net --allow-read --unstable server.ts
 // denon run --allow-net --allow-read --unstable server.ts
 app.listen({port: port})
+
+await initFiles('upload');// recupere les fichiers du dossier upload
 
 console.log(`app listening on -> http://localhost:${port}/`);

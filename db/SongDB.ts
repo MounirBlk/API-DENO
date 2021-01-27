@@ -24,7 +24,7 @@ export class SongDB{
         let allSongs = await this.selectAllSongs({})
         let uniqId = 1;
         for(let i = 0; i < allSongs.length; i++){
-            uniqId = (uniqId <= allSongs[i].idlol) ? (allSongs[i].idlol + 1) : uniqId
+            uniqId = (uniqId <= allSongs[i].id) ? (allSongs[i].id + 1) : uniqId
         }
         return uniqId;
     }
