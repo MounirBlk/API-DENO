@@ -35,7 +35,7 @@ export class SongModels extends SongDB implements SongInterfaces {
 
     async insert(): Promise < any > {
         await this.songdb.insertOne({
-            id: (await this.selectAllSongs({})).length + 1,
+            id: this.getUniqId(),
             name : this.name,
             url : this.url,
             cover : this.cover,

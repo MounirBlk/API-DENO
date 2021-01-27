@@ -20,4 +20,12 @@ export class SongDB{
     async selectAllSongs(objectSelectAll: Object):Promise <any>{
         return await this.songdb.find(objectSelectAll).toArray()
     }
+    async getUniqId(): Promise <any>{
+        let allSongs = await this.selectAllSongs({})
+        let uniqId = 1;
+        for(let i = 0; i < allSongs.length; i++){
+            uniqId = (uniqId <= allSongs[i].idlol) ? (allSongs[i].idlol + 1) : uniqId
+        }
+        return uniqId;
+    }
 }

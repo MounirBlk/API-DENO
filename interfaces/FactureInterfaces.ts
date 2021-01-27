@@ -2,8 +2,8 @@ import type { DateString, float } from 'https://deno.land/x/etype/mod.ts';
 
 export default interface FactureInterfaces {
 
-    //_id: { $oid: string }|null|string;
-    id?: number;
+    _id: { $oid: string }|null|string;
+    //id?: number;
     id_Stripe: string;
     date_payment: DateString;// string ?
     montant_ht: float;

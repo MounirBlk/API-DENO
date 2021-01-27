@@ -5,8 +5,8 @@ import type { float, DateString } from 'https://deno.land/x/etype/mod.ts';
 
 export class FactureModels extends FactureDB implements FactureInterfaces {
     [x: string]: any;
-    //private id: { $oid: string } | null = null;
-    id?: number;
+    private id: { $oid: string } | null = null;
+    //id?: number;
     id_Stripe: string;
     date_payment: DateString;// string ?
     montant_ht: float;
@@ -28,17 +28,17 @@ export class FactureModels extends FactureDB implements FactureInterfaces {
         this.idUser = idUser;
     }
 
-    /*get _id(): string | null{
+    get _id(): string | null{
         return (this.id === null) ? null : this.id.$oid;
     }
 
     setId (id: { $oid: string } | null): void{
         this.id = id;
-    }*/
+    }
 
     async insert(): Promise < any > {
-        /*this.id = */await this.facturedb.insertOne({
-            id: (await this.selectAllFactures({})).length + 1,
+        this.id = await this.facturedb.insertOne({
+            //id: (await this.selectAllFactures({})).length + 1,
             id_Stripe : this.id_Stripe,
             date_payment : this.date_payment,
             montant_ht : this.montant_ht,
