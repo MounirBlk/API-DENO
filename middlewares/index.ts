@@ -270,9 +270,9 @@ const calculTtcToHt = (montant_ttc: number | float, tauxTva: number | float) => 
  *  Function return files from upload directory
  *  @param {string} directory Nom du repertoire des songs
  */ 
-const initFiles = async(directory : string) => {
+const initFiles = async(directory : string = 'upload') => {
     for await (const data of Deno.readDirSync(Deno.cwd().concat('/' + directory))) {
-        data.isFile ? await stockFile(data.name) : data.isFile
+        data.isFile ? await stockFile(data.name, directory) : null
     }
     return console.log('Songs in collection');
 }
@@ -280,8 +280,8 @@ const initFiles = async(directory : string) => {
 /**
  *  Function qui envoie automatiquement les infos fichiers sur la bdd lors du lancement de l'API
  */ 
-const stockFile = async(name: string) => {
-    let filePath = Deno.cwd().concat(path.join('/upload/'+ name))
+const stockFile = async(name: string, directory: string = 'upload') => {
+    let filePath = Deno.cwd().concat(path.join('/' + directory + '/' + name))
     let extNamePath = path.extname(name).split('.')[1];
     let extName = extNamePath === '' || extNamePath === null || extNamePath === undefined ? '' : extNamePath
     if(await new SongDB().count({name: name}) === 0){
