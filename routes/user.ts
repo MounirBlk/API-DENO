@@ -161,6 +161,14 @@ const updateUtil = async (ctx: RouterContext) => {
  */ 
 const deconnexion = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    //if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
+    if(payloadToken === null || payloadToken === undefined /*|| payloadToken.role !== 'Tuteur'*/){
+        return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+    }else{
+    ctx.cookies.delete('payloadToken');
+    return dataResponse(ctx, 200, { error: false, message:"L'utilisateur a été déconnecté avec succès"}); 
+    }
 }
 
 export { login, register, deleteUser, updateUtil, deconnexion};
