@@ -32,8 +32,8 @@ router.get('/songs', getSongs);//12 Route recuperation des sources audio
 router.get('/songs/:id', getSong);//13 Route recuperation d'une source audio
 router.get('/bills', getBills);//14 Route recuperation des factures d'un parent
 
-// deno run --allow-net --allow-read --unstable server.ts
-// denon run --allow-net --allow-read --unstable server.ts
+// deno run --allow-net --allow-read --unstable --allow-env --allow-write --allow-plugin server.ts
+// denon run --allow-net --allow-read --unstable --allow-env --allow-write --allow-plugi server.ts
 app.listen({port: port})
 
 await initFiles('upload');// recupere les fichiers du dossier upload

@@ -271,10 +271,11 @@ const calculTtcToHt = (montant_ttc: number | float, tauxTva: number | float) => 
  *  @param {string} directory Nom du repertoire des songs
  */ 
 const initFiles = async(directory : string = 'upload') => {
+    await new SongDB().deleteAllSongs({});
     for await (const data of Deno.readDirSync(Deno.cwd().concat('/' + directory))) {
         data.isFile ? await stockFile(data.name, directory) : null
     }
-    return console.log('Songs in collection');
+    return console.log('Success: Songs in collection');
 }
 
 /**

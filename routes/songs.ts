@@ -6,7 +6,7 @@ import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import { config } from '../config/config.ts';
 import { getAuthToken, getJwtPayload } from "../helpers/jwt.helpers.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
-//import { play } from "https://deno.land/x/audio@0.1.0/mod.ts";//download
+import { play } from "https://deno.land/x/audio@0.1.0/mod.ts";//download
 
 /**
  *  Route getSongs
@@ -22,4 +22,7 @@ export const getSongs = async (ctx: RouterContext) => {
  */ 
 export const getSong = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
+    const id = parseInt(<string>ctx.params.id);
+    play(Deno.cwd().concat("/upload/Jax Jones - You Don't Know Me ft. RAYE.mp3"))
+    return dataResponse(ctx, 200, { error: false, id: parseInt(<string>ctx.params.id)})
 }

@@ -28,4 +28,7 @@ export class SongDB{
         }
         return uniqId;
     }
+    async deleteAllSongs(objectForRemoveAll: Object):Promise <void>{
+        await this.songdb.deleteMany(objectForRemoveAll)
+    }
 }
