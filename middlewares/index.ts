@@ -62,6 +62,7 @@ const deleteMapper = (data: any, mapperNameRoute?: string): any => {
     delete data.childsTab;
     delete data.idUser;
     data = mapperNameRoute === 'newChild' ? renameKey(data, '_role', 'role') : data;
+    delete data.cardInfos;
     return data;
 }
 

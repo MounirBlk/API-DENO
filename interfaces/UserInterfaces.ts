@@ -1,3 +1,4 @@
+import { cardTypes } from "../types/cardTypes.ts";
 import { roleTypes } from '../types/roleTypes.ts';
 import { userUpdateTypes } from '../types/userUpdateTypes.ts';
 
@@ -8,7 +9,7 @@ export default interface UserInterfaces {
     password: string;
     lastname: string;
     firstname: string;
-    subscription  : number;
+    subscription : number;
     sexe: string;
     dateNaissance: string;
     role: roleTypes;
@@ -17,6 +18,7 @@ export default interface UserInterfaces {
     attempt: number;
     token?: string | null;
     childsTab: Array<any>;
+    cardInfos?: cardTypes;
 
     // getAge(): Number;
     // fullName(): string;

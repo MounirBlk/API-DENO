@@ -1,3 +1,4 @@
+import { cardTypes } from "./cardTypes.ts";
 import { roleTypes } from './roleTypes.ts';
 export type userUpdateTypes = 
 {
@@ -14,6 +15,7 @@ export type userUpdateTypes =
     subscription ? : number,
     token?: string | null
     childsTab?: Array<any>;
+    cardInfos?: cardTypes;
 }
     
 
