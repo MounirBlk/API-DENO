@@ -3,6 +3,9 @@ import { UserDB } from "../db/userDB.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
 import type { float } from 'https://deno.land/x/etype/mod.ts';
+import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
+import { SongModels } from "../Models/SongModels.ts";
+import { SongDB } from "../db/SongDB.ts";
 
 /**
  * Function qui fait un retourne les données envoyéss
@@ -231,9 +234,15 @@ const binaryToText = (idBinary: any) => {
 /**
  *  Function qui return la date du jour à la seconde près aaaa/mm/jj hh:mm:ss
  */ 
-const getCurrentDate = () => {
-    let dt = new Date();
+const getCurrentDate = (dt: any = new Date()) => {
     return `${dt.getFullYear().toString().padStart(4, '0')}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`   
+}
+
+/**
+ *  Function qui return time en hh:mm:ss
+ */ 
+const getTimeHourSecMin = (dt: any = new Date()) => {
+    return `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`   
 }
 
 /**
@@ -257,4 +266,29 @@ const calculTtcToHt = (montant_ttc: number | float, tauxTva: number | float) => 
     return montant_ttc / (1 + tauxTva)
 }
 
-export { dataRequest, dataResponse, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ *  Function return files from upload directory
+ *  @param {string} directory Nom du repertoire des songs
+ */ 
+const initFiles = async(directory : string = 'upload') => {
+    await new SongDB().deleteAllSongs({});
+    for await (const data of Deno.readDirSync(Deno.cwd().concat('/' + directory))) {
+        data.isFile ? await stockFile(data.name, directory) : null
+    }
+    return console.log('Success: Songs in collection');
+}
+
+/**
+ *  Function qui envoie automatiquement les infos fichiers sur la bdd lors du lancement de l'API
+ */ 
+const stockFile = async(name: string, directory: string = 'upload') => {
+    let filePath = Deno.cwd().concat(path.join('/' + directory + '/' + name))
+    let extNamePath = path.extname(name).split('.')[1];
+    let extName = extNamePath === '' || extNamePath === null || extNamePath === undefined ? '' : extNamePath
+    if(await new SongDB().count({name: name}) === 0){
+        const song = new SongModels(name, filePath, 'cover', getTimeHourSecMin(), extName)
+        await song.insert()
+    }
+}
+
+export { dataRequest, dataResponse, initFiles, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};

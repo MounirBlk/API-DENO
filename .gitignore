@@ -117,3 +117,4 @@ dist
 .pnp.*
 
 cmd_git
+.deno_plugins
