@@ -20,4 +20,12 @@ export class UserDB{
     async selectAllUsers(objectSelectAll: Object):Promise <any>{
         return await this.userdb.find(objectSelectAll).toArray()
     }
+    async getUniqId(): Promise <any>{
+        let allUsers = await this.selectAllUsers({})
+        let uniqId = 1;
+        for(let i = 0; i < allUsers.length; i++){
+            uniqId = (uniqId <= allUsers[i].id) ? (allUsers[i].id + 1) : uniqId
+        }
+        return uniqId;
+    }
 }

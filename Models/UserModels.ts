@@ -4,6 +4,7 @@ import { UserDB } from '../db/userDB.ts';
 import { roleTypes } from '../types/roleTypes.ts';
 import UserInterfaces from '../interfaces/UserInterfaces.ts';
 import { userUpdateTypes } from '../types/userUpdateTypes.ts';
+import { cardTypes } from "../types/cardTypes.ts";
 
 export class UserModels extends UserDB implements UserInterfaces {
     [x: string]: any;
@@ -22,6 +23,8 @@ export class UserModels extends UserDB implements UserInterfaces {
     attempt: number;
     token?: string | null = null;
     childsTab: Array<any> = [] ;
+    cardInfos?: cardTypes;
+    dateSouscription?: Date;
 
     constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
@@ -63,6 +66,13 @@ export class UserModels extends UserDB implements UserInterfaces {
     // }
     async insert(): Promise < any > {
         this.password = await hash(this.password);
+        const cardInfos = {
+            id_carte: null,
+            cartNumber: null,
+            month: null,
+            year: null,
+            default: null
+        }
         this.id = await this.userdb.insertOne({
             firstname: this.firstname,
             lastname: this.lastname,
@@ -76,7 +86,9 @@ export class UserModels extends UserDB implements UserInterfaces {
             attempt: this.attempt,
             subscription: this.subscription,
             token: this.token,
-            childsTab: this.childsTab
+            childsTab: this.childsTab,
+            cardInfos: cardInfos,
+            dateSouscription: null
         });
         return this.id;
     }

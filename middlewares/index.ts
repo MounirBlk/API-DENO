@@ -6,6 +6,7 @@ import type { float } from 'https://deno.land/x/etype/mod.ts';
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { SongModels } from "../Models/SongModels.ts";
 import { SongDB } from "../db/SongDB.ts";
+import { UserModels } from "../Models/UserModels.ts";
 
 /**
  * Function qui fait un retourne les données envoyéss
@@ -62,6 +63,8 @@ const deleteMapper = (data: any, mapperNameRoute?: string): any => {
     delete data.childsTab;
     delete data.idUser;
     data = mapperNameRoute === 'newChild' ? renameKey(data, '_role', 'role') : data;
+    delete data.cardInfos;
+    delete data.dateSouscription;
     return data;
 }
 
@@ -195,11 +198,9 @@ const isValidLength = (text: string, min: number, max: number): boolean => {
 
 /**
  * Function qui retourne les enfants d'un parent
- * @param {Bson.ObjectId} payloadToken.id id du parent
+ * @param {UserInterfaces} userParent userParent
  */
 const getChildsByParent = async(userParent: UserInterfaces): Promise< Array<UserInterfaces> > => {
-    //const dbColParent = new UserDB();
-    //let userParent = await dbColParent.selectUser({ _id: new Bson.ObjectId(payloadTokenID) })
     let childs: Array<UserInterfaces> = [];
     let child: UserInterfaces;
     for (let i = 0; i < userParent.childsTab.length; i++){
@@ -291,4 +292,18 @@ const stockFile = async(name: string, directory: string = 'upload') => {
     }
 }
 
-export { dataRequest, dataResponse, initFiles, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ * Function qui valide la subscription aux enfants du parent
+ * @param {UserInterfaces} userParent userParent
+ */
+const updateSubscriptionChilds = async(userParent: UserInterfaces): Promise<void> => {
+    let childs : Array<UserInterfaces> = await getChildsByParent(userParent);
+    let userChild: any;
+    for(let i = 0; i < childs.length; i++){
+        userChild = new UserModels(childs[i].email, childs[i].password, childs[i].lastname, childs[i].firstname, childs[i].dateNaissance, childs[i].sexe, childs[i].attempt, childs[i].subscription);
+        userChild.setId(<{ $oid: string }>childs[i]._id);
+        await userChild.update({ subscription: 1/*, dateSouscription: new Date()*/});
+    }
+}
+
+export { dataRequest, dataResponse, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};

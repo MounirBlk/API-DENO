@@ -17,7 +17,7 @@ const header: any = {
 };
 
 /**
- * Function qui fait un retourne un token
+ * Function qui fait un retourne de token
  * @param {UserInterfaces} user 
  */
 const getAuthToken = async (id: any): Promise < string >  => {
@@ -61,7 +61,7 @@ const getJwtPayload = async(ctx: RouterContext, tokenHeader: string | null): Pro
                     }
                 }
             }else{
-                return null;//false pour erreur conformité
+                return null;//mettre a false pour générer erreur conformité
             }
         }
         return null;
