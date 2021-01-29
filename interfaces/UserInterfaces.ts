@@ -19,6 +19,7 @@ export default interface UserInterfaces {
     token?: string | null;
     childsTab: Array<any>;
     cardInfos?: cardTypes;
+    dateSouscription?: Date;
 
     // getAge(): Number;
     // fullName(): string;

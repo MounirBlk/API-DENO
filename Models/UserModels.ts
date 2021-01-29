@@ -24,7 +24,8 @@ export class UserModels extends UserDB implements UserInterfaces {
     token?: string | null = null;
     childsTab: Array<any> = [] ;
     cardInfos?: cardTypes;
-    
+    dateSouscription?: Date;
+
     constructor(email: string, password: string, lastname: string, firstname: string, dateNaissance: string, sexe: string, attempt:number, subscription  : number ) {
         super();
         this.firstname = firstname;
@@ -86,7 +87,8 @@ export class UserModels extends UserDB implements UserInterfaces {
             subscription: this.subscription,
             token: this.token,
             childsTab: this.childsTab,
-            cardInfos: cardInfos
+            cardInfos: cardInfos,
+            dateSouscription: null
         });
         return this.id;
     }

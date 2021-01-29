@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength, updateSubscriptionChilds } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
@@ -11,6 +11,7 @@ import { FactureModels } from "../Models/FactureModels.ts";
 import FactureInterfaces from "../interfaces/FactureInterfaces.ts";
 import { v4 } from "https://deno.land/std@0.84.0/uuid/mod.ts";
 import type { float, DateString } from 'https://deno.land/x/etype/mod.ts';
+import { sendMail } from "../helpers/mail.ts";
 
 /**
  *  Route subscription
@@ -18,7 +19,34 @@ import type { float, DateString } from 'https://deno.land/x/etype/mod.ts';
  */ 
 export const subscription = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
-    //await addBill(payloadToken.id) // ajout facture
+    if(data === undefined || data === null) return dataResponse(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
+    if(exist(data.id) === false || exist(data.cvc) === false) {
+        return dataResponse(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
+    }else{
+        const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+        if (payloadToken === null || payloadToken === undefined ) return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+        const userParent = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+        //let isError = false;
+        if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.id_carte !== parseInt(data.id)){
+            return dataResponse(ctx, 402, { error: true, message: "Echec du payement de l'offre"})
+        }else{
+            let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
+            utilisateurParent.setId(<{ $oid: string }>userParent._id)
+            if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date()});
+            await updateSubscriptionChilds(userParent);
+            if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5){// periode d'essaie
+                return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" })
+            }else{// abonnement 
+                if(await new FactureDB().count({ idUser: payloadToken.id}) === 0){// abonnement deja présent
+                    await addBill(payloadToken.id) // ajout facture
+                    //console.log("SENDMAIL")
+                    await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour") //port 425 already in use
+                }
+                return dataResponse(ctx, 200, { error: false, message: "Votre abonnement a bien été mise à jour" })
+            }
+        }
+    }
 }
 
 /**
@@ -92,7 +120,6 @@ export const getBills = async (ctx: RouterContext) => {
  *  @param {string} idUser
  */ 
 const addBill = async (idUser: string) => {
-    console.log(idUser)
     let tauxTva = 0.2;
     let montant_ttc = randomFloat(100,1000);
     const factures = new FactureModels(v4.generate(), getCurrentDate(), parseFloat(calculTtcToHt(montant_ttc, tauxTva).toFixed(2)), parseFloat(montant_ttc.toFixed(2)), idUser)

@@ -38,7 +38,6 @@ const login = async (ctx: RouterContext) => {
                         return dataResponse(ctx, 429, { error: true, message: "Trop de tentative sur l'email " + data.Email + " (5 max) - Veuillez patienter (2min)"});
                     }else{
                         const jwtToken = await getAuthToken(user._id);// génération du token
-                        console.log(jwtToken.length)
                         user.token = jwtToken;
                         utilisateur.setId(<{ $oid: string }>user._id);
                         let isSuccess = await utilisateur.update(user);
