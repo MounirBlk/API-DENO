@@ -1,8 +1,9 @@
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
-import { initFiles } from "./middlewares/index.ts";
+import { dataResponse, initFiles } from "./middlewares/index.ts";
 import { staticFileMiddleware } from "./middlewares/staticFileMiddleware.ts";
+import { addCardStripe, addCustomerStripe, updateCustomerStripe } from "./middlewares/stripe.ts";
 import { deleteChild, getChilds, newChild } from "./routes/child.ts";
 import { addCard, getBills, subscription } from "./routes/facture.ts";
 import { getSong, getSongs } from "./routes/songs.ts";
@@ -31,6 +32,14 @@ router.delete('/user', deleteUser);//11 Route delete user
 router.get('/songs', getSongs);//12 Route recuperation des sources audio
 router.get('/songs/:id', getSong);//13 Route recuperation d'une source audio
 router.get('/bills', getBills);//14 Route recuperation des factures d'un parent
+
+router.get('/test', async(ctx: RouterContext) =>{
+    let responseAddCustomer = await addCustomerStripe('mou95500@gmail.com', 'Mounir blk');
+    let responseAddCard = await addCardStripe(responseAddCustomer.data.id, 4343434343434343, 11, 22, 123); 
+    //let responseUpdateCustomer = await updateCustomerStripe(responseAddCustomer.data.id, responseAddCrad.data.id);
+    return dataResponse(ctx, 200, { error: false, id: responseAddCard.data.id}) 
+});//test
+
 
 // deno run --allow-net --allow-read --unstable --allow-env --allow-write --allow-plugin server.ts
 // denon run --allow-net --allow-read --unstable --allow-env --allow-write --allow-plugin server.ts
