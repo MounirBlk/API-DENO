@@ -48,7 +48,7 @@ export const updateCustomerCardStripe = async(idCustomer: string, idCard: string
 /**
  *  Ajout du produit stripe
  */ 
-export const addProductStripe = async(name: string = "Radio-FEED", description: string = "Radio pour les enfants", unitAmount: number = 500, currency: string = 'eur') => {
+export const addProductStripe = async(name: string, description: string, unitAmount: number = 500, currency: string = 'eur') => {
     let payload: any = {
         name: name,
         description: description
