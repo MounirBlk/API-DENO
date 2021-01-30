@@ -17,6 +17,7 @@ export type userUpdateTypes =
     childsTab?: Array<any>;
     cardInfos?: cardTypes;
     dateSouscription?: Date;
+    customerId? : string;
 }
     
 

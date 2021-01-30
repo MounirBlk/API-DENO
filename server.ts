@@ -1,14 +1,12 @@
 import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { Application, Router, RouterContext, Request, Response, send } from "https://deno.land/x/oak/mod.ts";//download
 import { config } from './config/config.ts';
-import { initFiles } from "./middlewares/index.ts";
+import { dataResponse, initFiles, initProductStripe } from "./middlewares/index.ts";
 import { staticFileMiddleware } from "./middlewares/staticFileMiddleware.ts";
 import { deleteChild, getChilds, newChild } from "./routes/child.ts";
 import { addCard, getBills, subscription } from "./routes/facture.ts";
 import { getSong, getSongs } from "./routes/songs.ts";
 import { deconnexion, deleteUser, login, register, updateUtil } from "./routes/user.ts";
-//import { play } from "https://deno.land/x/audio@0.1.0/mod.ts";//download
-
 
 const app = new Application();
 const router = new Router();
@@ -36,6 +34,7 @@ router.get('/bills', getBills);//14 Route recuperation des factures d'un parent
 // denon run --allow-net --allow-read --unstable --allow-env --allow-write --allow-plugin server.ts
 app.listen({port: port})
 
+await initProductStripe();// initialise automatiquement le produit sur STRIPE ('Radio-FEED')
 await initFiles('upload');// recupere les fichiers du dossier upload
 
 console.log(`app listening on -> http://localhost:${port}/`);
