@@ -12,6 +12,8 @@ import FactureInterfaces from "../interfaces/FactureInterfaces.ts";
 import { v4 } from "https://deno.land/std@0.84.0/uuid/mod.ts";
 import type { float, DateString } from 'https://deno.land/x/etype/mod.ts';
 import { sendMail } from "../helpers/mail.ts";
+import { addCardStripe, addCustomerStripe, updateCustomerCardStripe, paymentStripe } from "../middlewares/stripe.ts";
+import { ProductDB } from "../db/ProductDB.ts";
 
 /**
  *  Route subscription
@@ -33,15 +35,16 @@ export const subscription = async (ctx: RouterContext) => {
         }else{
             let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
             utilisateurParent.setId(<{ $oid: string }>userParent._id)
-            if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date()});
+            if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date() });
             await updateSubscriptionChilds(userParent);
-            if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5){// periode d'essaie
+            if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5 || userParent.dateSouscription === null){// periode d'essaie
                 return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" })
             }else{// abonnement 
                 if(await new FactureDB().count({ idUser: payloadToken.id}) === 0){// abonnement deja présent
-                    await addBill(payloadToken.id) // ajout facture
-                    //console.log("SENDMAIL")
                     await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour") //port 425 already in use
+                    const product = await new ProductDB().selectProduct({name : "Radio-FEED"})
+                    const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
+                    await addBill(responsePayment?.data.id, payloadToken.id) // ajout facture
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre abonnement a bien été mise à jour" })
             }
@@ -86,9 +89,12 @@ export const addCard = async (ctx: RouterContext) => {
                                 year: data.year,
                                 default: data.default
                             }
+                            const responseAddCard = await addCardStripe(cardInfos.cartNumber, cardInfos.month, cardInfos.year); //4242424242424242, 11, 22, 123
+                            const responseAddCustomer = await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname);
+                            await updateCustomerCardStripe(responseAddCustomer.data.id, responseAddCard.data.id);
                             let utilisateur = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
                             utilisateur.setId(<{ $oid: string }>userParent._id)
-                            await utilisateur.update({ cardInfos: cardInfos })
+                            await utilisateur.update({ cardInfos: cardInfos, customerId : responseAddCustomer.data.id})
                             return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
                         }
                     }
@@ -117,11 +123,13 @@ export const getBills = async (ctx: RouterContext) => {
 
 /**
  *  addBill
+ *  @param {string} idStripePayment
  *  @param {string} idUser
  */ 
-const addBill = async (idUser: string) => {
+const addBill = async (idStripePayment: string, idUser: string) => {
     let tauxTva = 0.2;
-    let montant_ttc = randomFloat(100,1000);
-    const factures = new FactureModels(v4.generate(), getCurrentDate(), parseFloat(calculTtcToHt(montant_ttc, tauxTva).toFixed(2)), parseFloat(montant_ttc.toFixed(2)), idUser)
+    let montant_ttc = 5/*randomFloat(100,1000)*/; //5 Euros
+    const idStripe = idStripePayment === null || idStripePayment === undefined ? v4.generate() : idStripePayment
+    const factures = new FactureModels(idStripe, getCurrentDate(), parseFloat(calculTtcToHt(montant_ttc, tauxTva).toFixed(2)), parseFloat(montant_ttc.toFixed(2)), idUser)
     await factures.insert()
 }

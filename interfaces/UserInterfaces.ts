@@ -20,7 +20,8 @@ export default interface UserInterfaces {
     childsTab: Array<any>;
     cardInfos?: cardTypes;
     dateSouscription?: Date;
-
+    customerId? : string;
+    
     // getAge(): Number;
     // fullName(): string;
     insert(): Promise < any > ;

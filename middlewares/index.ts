@@ -7,6 +7,8 @@ import * as path from "https://deno.land/std@0.65.0/path/mod.ts"//download
 import { SongModels } from "../Models/SongModels.ts";
 import { SongDB } from "../db/SongDB.ts";
 import { UserModels } from "../Models/UserModels.ts";
+import { addProductStripe } from "./stripe.ts";
+import { ProductDB } from "../db/ProductDB.ts";
 
 /**
  * Function qui fait un retourne les données envoyéss
@@ -65,6 +67,7 @@ const deleteMapper = (data: any, mapperNameRoute?: string): any => {
     data = mapperNameRoute === 'newChild' ? renameKey(data, '_role', 'role') : data;
     delete data.cardInfos;
     delete data.dateSouscription;
+    delete data.customerId;
     return data;
 }
 
@@ -306,4 +309,18 @@ const updateSubscriptionChilds = async(userParent: UserInterfaces): Promise<void
     }
 }
 
-export { dataRequest, dataResponse, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ * Initialise automatiquement le produit sur STRIPE
+ * @param {string} name nom du produit
+ */
+const initProductStripe = async(name: string = 'Radio-FEED') => {
+    if(await new ProductDB().count({name : name}) === 0 ){
+        const responseAddProduct = await addProductStripe();// ajout du produit sur stripe
+        await new ProductDB().insert({idProduct : responseAddProduct.data.id, name: name})
+        return console.log('Success: Product stripe initialized');
+    }else{
+        return console.log('Success: Product stripe already initialized');
+    }
+}
+
+export { dataRequest, dataResponse, initProductStripe, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
