@@ -313,9 +313,9 @@ const updateSubscriptionChilds = async(userParent: UserInterfaces): Promise<void
  * Initialise automatiquement le produit sur STRIPE
  * @param {string} name nom du produit
  */
-const initProductStripe = async(name: string = 'Radio-FEED') => {
+const initProductStripe = async(name: string = 'Radio-FEED', description: string = "Radio pour les enfants") => {
     if(await new ProductDB().count({name : name}) === 0 ){
-        const responseAddProduct = await addProductStripe();// ajout du produit sur stripe
+        const responseAddProduct = await addProductStripe(name, description);// ajout du produit radio sur stripe
         await new ProductDB().insert({idProduct : responseAddProduct.data.id, name: name})
         return console.log('Success: Product stripe initialized');
     }else{
