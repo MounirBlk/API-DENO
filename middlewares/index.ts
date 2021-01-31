@@ -56,8 +56,7 @@ const dataResponse = (ctx: RouterContext, status: number = 500, data: any = { er
  *  @param {string} mapperNameRoute? Nom de la route
  */ 
 const deleteMapper = (data: any, mapperNameRoute?: string): any => {
-    
-    mapperNameRoute !== 'getSongs' && mapperNameRoute !== 'getSong'? (delete data.id) : null// ! l'ordre est important pour le rename de la key _id en id
+    mapperNameRoute !== 'getSongs' && mapperNameRoute !== 'getSong' ? (delete data.id) : null// ! l'ordre est important pour le rename de la key _id en id
     mapperNameRoute !== 'getBills' ? (delete data._id) : (data = renameKey(data, '_id', 'id'))// !
     delete data.userdb;
     delete data.password;
