@@ -160,6 +160,17 @@ const updateUtil = async (ctx: RouterContext) => {
  */ 
 const deconnexion = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined){
+        return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
+    }else{
+        const dbCollection = new UserDB();
+        let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
+        utilisateur.setId(<{ $oid: string}>user._id)
+        utilisateur.update({token:null})
+        return dataResponse(ctx, 200, { error: false, message:"L'utilisateur a été déconnecté avec succès"}); 
+    }
 }
 
 export { login, register, deleteUser, updateUtil, deconnexion};
