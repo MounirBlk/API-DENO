@@ -50,7 +50,7 @@ export const getSong = async (ctx: RouterContext) => {
         }else{
             let song = await new SongDB().selectSong({id:idSong})
             play(song.url)
-            return dataResponse(ctx, 200, { error: false, songs: deleteMapper(song,'getSong')})
+            return dataResponse(ctx, 201, { error: false, songs: deleteMapper(song,'getSong')})
         }
     }
     
