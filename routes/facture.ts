@@ -41,10 +41,10 @@ export const subscription = async (ctx: RouterContext) => {
                 if(userParent.subscription === 0){
                     setTimeout(async() => {
                         await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour") //port 425 already in use
-                        const product = await new ProductDB().selectProduct({name : "Radio-FEED"})
+                        const product = await new ProductDB().selectProduct({ name : "Radio-FEED" })
                         const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
                         await addBill(responsePayment?.data.id, payloadToken.id) // ajout facture
-                    }, 60000 * 5);//5 mins 
+                    }, 60000 * 5);//5 mins asynchrone
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" })
             }else{// abonnement 

@@ -118,3 +118,4 @@ dist
 
 cmd_git
 .deno_plugins
+corporate.pem
