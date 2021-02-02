@@ -14,13 +14,13 @@ export const sendMail = async (email:string, objet: string = "Welcome!", content
 
     await client.connectTLS({
       hostname: "smtp.gmail.com",
-      port: 465,
+      port: 465,// 25  465  587
       username: SEND_EMAIL,
       password: SEND_PWD,
     });
 
     await client.send({
-      from: exist(SEND_EMAIL) ? SEND_EMAIL : "exemple@gmail.com",
+      from: exist(SEND_EMAIL) ? SEND_EMAIL : "ne-pas-repondre-deno@gmail.com",
       to: email,
       subject: objet,
       content: content,

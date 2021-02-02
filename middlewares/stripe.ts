@@ -65,7 +65,7 @@ const addPriceProductStripe = async(idProduct: string, unitAmount: number = 500,
     let payload: any = {
         "product": idProduct,
         "currency": currency.toLowerCase(),
-        "unit_amount": unitAmount < 0 ? 500 : unitAmount,
+        "unit_amount": unitAmount < 0 ? 500 : unitAmount,// equivalent a 500 centimes soit 5.00 Euros
         "billing_scheme": "per_unit",
         "recurring[interval]":"month",
         "recurring[interval_count]":"1",
@@ -98,7 +98,7 @@ export const paymentStripe = async(idCustomer: string | undefined, idPrice: stri
 }
 
 /**
- *  Conversion to form body
+ *  Request config 
  *  @param methodReq post / get / put / delete ...
  *  @param dataBody data from body
  */ 
