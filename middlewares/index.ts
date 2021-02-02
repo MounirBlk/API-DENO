@@ -312,6 +312,7 @@ const updateSubscriptionChilds = async(userParent: UserInterfaces): Promise<void
 /**
  * Initialise automatiquement le produit sur STRIPE
  * @param {string} name nom du produit
+ * @param {string} description description du produit
  */
 const initProductStripe = async(name: string = 'Radio-FEED', description: string = "Radio pour les enfants") => {
     if(await new ProductDB().count({name : name}) === 0 ){
