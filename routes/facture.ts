@@ -34,26 +34,20 @@ export const subscription = async (ctx: RouterContext) => {
             return dataResponse(ctx, 402, { error: true, message: "Echec du payement de l'offre"})
         }else{
             if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5 || userParent.dateSouscription === null){// periode d'essaie
-                let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
-                utilisateurParent.setId(<{ $oid: string }>userParent._id)
-                if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date() });// effectue l'abonnement
-                await updateSubscriptionChilds(userParent);
-                if(userParent.subscription === 0){
+                if(<number>userParent.subscription === 0){
+                    let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
+                    utilisateurParent.setId(<{ $oid: string }>userParent._id);
+                    if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date() });// effectue l'abonnement
+                    await updateSubscriptionChilds(userParent);
                     setTimeout(async() => {
-                        await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour") //port 425 already in use
-                        const product = await new ProductDB().selectProduct({ name : "Radio-FEED" })
+                        await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour"); //port 425 already in use
+                        const product = await new ProductDB().selectProduct({ name : "Radio-FEED" });
                         const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
-                        await addBill(responsePayment?.data.id, payloadToken.id) // ajout facture
+                        await addBill(responsePayment?.data.id, payloadToken.id); // ajout facture
                     }, 60000 * 5);//5 mins asynchrone
                 }
-                return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" })
+                return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" });
             }else{// abonnement 
-                /*if(await new FactureDB().count({ idUser: payloadToken.id}) === 0){// abonnement deja présent
-                    await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour") //port 425 already in use
-                    const product = await new ProductDB().selectProduct({name : "Radio-FEED"})
-                    const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
-                    await addBill(responsePayment?.data.id, payloadToken.id) // ajout facture
-                }*/
                 return dataResponse(ctx, 200, { error: false, message: "Votre abonnement a bien été mise à jour" })
             }
         }
