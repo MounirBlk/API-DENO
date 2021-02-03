@@ -43,7 +43,7 @@ export const subscription = async (ctx: RouterContext) => {
                         await abonnementDetails(userParent, payloadToken)
                     }, 60000 * 5);//5 mins asynchrone
                 }else{
-                    if(await new FactureDB().count({ idUser : payloadToken.id }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
+                    if(await new FactureDB().count({ idUser : String(payloadToken.id) }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
                         //let todayWith5mins = new Date(new Date().getTime() + 5*60000); //Date dans le futur de 5mins
                         setTimeout(async() => {
                             await abonnementDetails(userParent, payloadToken)
@@ -52,7 +52,7 @@ export const subscription = async (ctx: RouterContext) => {
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" });
             }else{// abonnement confirmé
-                if(await new FactureDB().count({ idUser : payloadToken.id }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
+                if(await new FactureDB().count({ idUser : String(payloadToken.id) }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
                         await abonnementDetails(userParent, payloadToken);
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre abonnement a bien été mise à jour" })
