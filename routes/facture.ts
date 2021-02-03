@@ -33,21 +33,28 @@ export const subscription = async (ctx: RouterContext) => {
         if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.id_carte !== parseInt(data.id)){
             return dataResponse(ctx, 402, { error: true, message: "Echec du payement de l'offre"})
         }else{
-            if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5 || userParent.dateSouscription === null){// periode d'essaie
+            if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5 || userParent.dateSouscription === null){// periode d'essaie activé
                 if(<number>userParent.subscription === 0){
                     let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
                     utilisateurParent.setId(<{ $oid: string }>userParent._id);
                     if(userParent.dateSouscription === null) await utilisateurParent.update({ subscription: 1, dateSouscription: new Date() });// effectue l'abonnement
                     await updateSubscriptionChilds(userParent);
                     setTimeout(async() => {
-                        await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour"); //port 425 already in use
-                        const product = await new ProductDB().selectProduct({ name : "Radio-FEED" });
-                        const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
-                        await addBill(responsePayment?.data.id, payloadToken.id); // ajout facture
+                        await abonnementDetails(userParent, payloadToken)
                     }, 60000 * 5);//5 mins asynchrone
+                }else{
+                    if(await new FactureDB().count({ idUser : payloadToken.id }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
+                        //let todayWith5mins = new Date(new Date().getTime() + 5*60000); //Date dans le futur de 5mins
+                        setTimeout(async() => {
+                            await abonnementDetails(userParent, payloadToken)
+                        }, (<any>userParent.dateSouscription / 1) - (new Date().getTime()));//Temps restant pour la période d'essaie (new Date().getTime() est équivalent <any>new Date() / 1)
+                    }
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" });
-            }else{// abonnement 
+            }else{// abonnement confirmé
+                if(await new FactureDB().count({ idUser : payloadToken.id }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
+                        await abonnementDetails(userParent, payloadToken);
+                }
                 return dataResponse(ctx, 200, { error: false, message: "Votre abonnement a bien été mise à jour" })
             }
         }
@@ -128,10 +135,22 @@ export const getBills = async (ctx: RouterContext) => {
  *  @param {string} idStripePayment
  *  @param {string} idUser
  */ 
-const addBill = async (idStripePayment: string, idUser: string) => {
+const addBill = async (idStripePayment: string, idUser: string): Promise<void> => {
     let tauxTva = 0.2;
     let montant_ttc = 5/*randomFloat(100,1000)*/; //5 Euros
     const idStripe = idStripePayment === null || idStripePayment === undefined ? v4.generate() : idStripePayment
     const factures = new FactureModels(idStripe, getCurrentDate(), parseFloat(calculTtcToHt(montant_ttc, tauxTva).toFixed(2)), parseFloat(montant_ttc.toFixed(2)), idUser)
     await factures.insert()
+}
+
+/**
+ *  Abonnement details: send mail / add bill / add abonnement stripe
+ *  @param {UserInterfaces} userParent
+ *  @param {Object} payloadToken
+ */
+const abonnementDetails = async(userParent: UserInterfaces, payloadToken: any): Promise<void> => {
+    await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour"); //port 425 already in use
+    const product = await new ProductDB().selectProduct({ name : "Radio-FEED" });
+    const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
+    await addBill(responsePayment?.data.id, payloadToken.id); // ajout facture
 }
