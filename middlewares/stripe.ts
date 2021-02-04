@@ -98,6 +98,13 @@ export const paymentStripe = async(idCustomer: string | undefined, idPrice: stri
 }
 
 /**
+ *  Récupération des données du client Stripe
+ */ 
+export const getCustomerStripe = async(idCustomer: string) => {
+    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}`, getConfigAxiod('get'))
+}
+
+/**
  *  Request config 
  *  @param methodReq post / get / put / delete ...
  *  @param dataBody data from body

@@ -18,7 +18,7 @@ export default interface UserInterfaces {
     attempt: number;
     token?: string | null;
     childsTab: Array<any>;
-    cardInfos?: cardTypes;
+    cardInfos?: Array<cardTypes>;
     dateSouscription?: Date;
     customerId? : string;
     

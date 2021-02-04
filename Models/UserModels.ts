@@ -23,7 +23,7 @@ export class UserModels extends UserDB implements UserInterfaces {
     attempt: number;
     token?: string | null = null;
     childsTab: Array<any> = [] ;
-    cardInfos?: cardTypes;
+    cardInfos?: Array<cardTypes> = [];
     dateSouscription?: Date;
     customerId?: string;
 
@@ -67,13 +67,13 @@ export class UserModels extends UserDB implements UserInterfaces {
     // }
     async insert(): Promise < any > {
         this.password = await hash(this.password);
-        const cardInfos = {
-            id_carte: null,
-            cartNumber: null,
-            month: null,
-            year: null,
-            default: null
-        }
+        // const cardInfos = {
+        //     id_carte: null,
+        //     cartNumber: null,
+        //     month: null,
+        //     year: null,
+        //     default: null
+        // }
         this.id = await this.userdb.insertOne({
             firstname: this.firstname,
             lastname: this.lastname,
@@ -88,7 +88,7 @@ export class UserModels extends UserDB implements UserInterfaces {
             subscription: this.subscription,
             token: this.token,
             childsTab: this.childsTab,
-            cardInfos: cardInfos,
+            cardInfos: this.cardInfos,
             dateSouscription: null,
             customerId: null
         });
