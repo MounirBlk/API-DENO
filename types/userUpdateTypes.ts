@@ -15,7 +15,7 @@ export type userUpdateTypes =
     subscription ? : number,
     token?: string | null
     childsTab?: Array<any>;
-    cardInfos?: cardTypes;
+    cardInfos?: Array<cardTypes>;
     dateSouscription?: Date;
     customerId? : string;
 }
