@@ -52,12 +52,7 @@ const newChild = async (ctx: RouterContext) => {
                     if (!isValid || isValid === 0){
                         return dataResponse(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
                     }else{
-                        //let isSuccess = await utilisateurChild.update({token: await getAuthToken(idChild)})
-                        //if(isSuccess || isSuccess === 1){
                         return dataResponse(ctx, 201, { error: false, message: "Votre enfant a bien été créé avec succès", user: deleteMapper(utilisateurChild, 'newChild')})//Mapper to perform pour l'ordre du role
-                        //}else{
-                        //  return dataResponse(ctx, 500, { error: true, message: 'Error process'})// Cette erreur ne doit jamais apparaitre
-                        //}
                     } 
                 }               
             }

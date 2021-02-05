@@ -12,16 +12,22 @@ const {
 /**
  *  Add card token stripe
  */ 
-export const addCardStripe = async(numberCard: number, exp_month: number, exp_year: number, cvc?: number) => {
-    let payload: any = {
-        "card[number]": String(numberCard),
-        "card[exp_month]": String(exp_month),
-        "card[exp_year]": String(exp_year),
-        //"card[cvc]": String(cvc),//optional
-    };
-    
-    const dataBody = convertToFormBody(payload);
-    return await axiod(`https://api.stripe.com/v1/tokens`, getConfigAxiod('post', dataBody))// return tok_...
+export const addCardStripe = async(numberCard: number, exp_month: number, exp_year: number, cvc?: number) : Promise<any> => {
+    return new Promise(async(resolve, reject) => {
+        let payload: any = {
+            "card[number]": String(numberCard),
+            "card[exp_month]": String(exp_month),
+            "card[exp_year]": String(exp_year),
+            //"card[cvc]": String(cvc),//optional
+        };
+        const dataBody = convertToFormBody(payload);
+        await axiod(`https://api.stripe.com/v1/tokens`, getConfigAxiod('post', dataBody))
+            .then((data) => {
+                resolve(data.data)// return tok_...
+            }).catch((error) => {
+                resolve(error.response)
+            })
+    });
 }
 
 /**
@@ -82,21 +88,28 @@ const addPriceProductStripe = async(idProduct: string, unitAmount: number = 500,
 /**
  *  Payment abonnement au produit
  */ 
-export const paymentStripe = async(idCustomer: string | undefined, idPrice: string, quantity: number = 1) => {
-    if(idCustomer === null || idCustomer === undefined){
-        return;
-    }else{
-        let payload: any = {
-            "customer": idCustomer,
-            "off_session": String(true),
-            "collection_method": "charge_automatically",
-            "items[0][price]": idPrice,
-            "items[0][quantity]": String(quantity),
-            "enable_incomplete_payments": String(false) // Champ a vérifier et confirmer
-        };
-        const dataBody = convertToFormBody(payload);
-        return await axiod(`https://api.stripe.com/v1/subscriptions`, getConfigAxiod('post', dataBody))
-    }
+export const paymentStripe = async(idCustomer: string | undefined, idPrice: string, quantity: number = 1): Promise<any>=> {
+    return new Promise(async(resolve, reject) => {
+        if(idCustomer === null || idCustomer === undefined){
+            reject();
+        }else{
+            let payload: any = {
+                "customer": idCustomer,
+                "off_session": String(true),
+                "collection_method": "charge_automatically",
+                "items[0][price]": idPrice,
+                "items[0][quantity]": String(quantity),
+                "enable_incomplete_payments": String(false) // Champ a vérifier et confirmer
+            };
+            const dataBody = convertToFormBody(payload);
+            await axiod(`https://api.stripe.com/v1/subscriptions`, getConfigAxiod('post', dataBody))
+                .then((data) => {
+                    resolve(data)//return sub_...
+                }).catch((error) => {
+                    reject(error)
+                })
+        }        
+    });
 }
 
 /**
@@ -154,8 +167,13 @@ export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): 
     if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.filter(item => item.id_carte === parseInt(data.id)).length === 0){
         return true;//fail
     }else{
-        //TODO: check card cvc 
-        return false;//success
+        const isNegative: boolean = parseInt(data.cvc) < 0 || parseInt(data.id) < 0 ? true : false;
+        if(isNegative){
+            return true;//fail
+        }else{
+            //TODO: check card cvc 
+            return false;//success
+        }
     }
 }
 
