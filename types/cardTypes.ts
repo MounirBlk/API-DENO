@@ -4,5 +4,6 @@ export type cardTypes = {
     month: number;// 02 caracteres numerique 
     year: number;// 02 caracteres numerique
     default:boolean;// true or false boolean
+    cardIdStripe: string; // id stripe de la carte
 }
     

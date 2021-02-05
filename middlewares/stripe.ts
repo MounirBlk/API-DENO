@@ -1,5 +1,7 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
+import { isValidLength } from "./index.ts";
 import { config } from '../config/config.ts';
+import UserInterfaces from "../interfaces/UserInterfaces.ts";
 
 const {
     STRIPE_SECRET_KEY,
@@ -19,7 +21,7 @@ export const addCardStripe = async(numberCard: number, exp_month: number, exp_ye
     };
     
     const dataBody = convertToFormBody(payload);
-    return await axiod(`https://api.stripe.com/v1/tokens`, getConfigAxiod('post', dataBody))//
+    return await axiod(`https://api.stripe.com/v1/tokens`, getConfigAxiod('post', dataBody))// return tok_...
 }
 
 /**
@@ -31,7 +33,7 @@ export const addCustomerStripe = async(email: string, fullName: string) => {
         "name": fullName,
     };
     const dataBody = convertToFormBody(payload);
-    return await axiod("https://api.stripe.com/v1/customers", getConfigAxiod('post', dataBody))
+    return await axiod("https://api.stripe.com/v1/customers", getConfigAxiod('post', dataBody))// return cus_...
 }
 
 /**
@@ -42,7 +44,7 @@ export const updateCustomerCardStripe = async(idCustomer: string, idCard: string
         'source' : idCard
     };
     const dataBody = convertToFormBody(payload);
-    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources`, getConfigAxiod('post', dataBody))
+    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources`, getConfigAxiod('post', dataBody))// return src_...
 }
 
 /**
@@ -105,9 +107,63 @@ export const getCustomerStripe = async(idCustomer: string) => {
 }
 
 /**
+ *  Function get all cards from customer
+ *  @param idCard idCard
+ */ 
+export const getAllCardsCustomerStripe = async(idCustomer: string | undefined) => {
+    if(idCustomer === null || idCustomer === undefined) return { data: {} };
+    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources?object=card`, getConfigAxiod('get'))
+}
+
+/**
+ *  Function get one card from customer
+ *  @param idCustomer idCustomer
+ *  @param idCard idCard
+ */ 
+export const getCardCustomerStripe = async(idCustomer: string, idCard: string) => {
+    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources/${idCard}`, getConfigAxiod('get'))
+}
+
+/**
+ *  Function to detach a source card from customer
+ *  @param idCustomer idCustomer
+ *  @param idCard idCard
+ */ 
+export const deleteCustomerStripe = async(idCustomer: string, idCard: string) => {
+    return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources/${idCard}`, getConfigAxiod('delete'))
+}
+
+/**
+ *  Check si la carte existe deja ou pas (true = existe deja et false = n'existe pas)
+ */ 
+export const checkIsCardAlreadyExist = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
+    //const allCards: Array<any> = (await getAllCardsCustomerStripe(userParent.customerId)).data.data;// tableau de cartes bancaires 
+    const cardInfosLength: number | undefined = userParent.cardInfos?.filter(item => item.cartNumber === parseInt(data.cartNumber)).length;
+    if(cardInfosLength === undefined) console.log('UNDEFINED TO FIX !')
+    if(cardInfosLength === 1){
+        return true;// existe deja
+    }else{
+        return false;// n'existe pas
+    }
+}
+
+/**
+ *  Check si le payment a fonctionné ou pas (true = fail et false = success)
+ */ 
+export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
+    if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.filter(item => item.id_carte === parseInt(data.id)).length === 0){
+        return true;//fail
+    }else{
+        //TODO: check card cvc 
+        return false;//success
+    }
+}
+
+
+/**
  *  Request config 
  *  @param methodReq post / get / put / delete ...
- *  @param dataBody data from body
+ *  @param dataBody? data from body
  */ 
 const getConfigAxiod = (methodReq: string, dataBody: any = null) => {
     const configAxiod = {
@@ -126,11 +182,11 @@ const getConfigAxiod = (methodReq: string, dataBody: any = null) => {
 /**
  *  Conversion to form body
  */ 
-const convertToFormBody = (cardDetails: any) => {
+const convertToFormBody = (data: any) => {
     let formBody: any = [];
-    for (let property in cardDetails) {
+    for (let property in data) {
         //cardDetails.hasOwnProperty(property)
-        formBody.push(encodeURIComponent(property) + '=' + encodeURIComponent(cardDetails[property]));
+        formBody.push(encodeURIComponent(property) + '=' + encodeURIComponent(data[property]));
     }
     return formBody.join("&");
 }
