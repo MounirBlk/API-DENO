@@ -43,12 +43,10 @@ export const subscription = async (ctx: RouterContext) => {
                         await abonnementDetails(userParent, payloadToken)
                     }, 60000 * 5);//5 mins asynchrone
                 }else{
-                    if(await new FactureDB().count({ idUser : String(payloadToken.id) }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
-                        //let todayWith5mins = new Date(new Date().getTime() + 5*60000); //Date dans le futur de 5mins
-                        setTimeout(async() => {
-                            await abonnementDetails(userParent, payloadToken)
-                        }, (<any>userParent.dateSouscription / 1) - (new Date().getTime()));//Temps restant pour la période d'essaie (new Date().getTime() est équivalent <any>new Date() / 1)
-                    }
+                    //let todayWith5mins = new Date(new Date().getTime() + 5*60000); //Date dans le futur de 5mins
+                    setTimeout(async() => {
+                        await abonnementDetails(userParent, payloadToken)
+                    }, ((<any>userParent.dateSouscription / 1) + 10000) - (new Date().getTime()));//Temps restant pour la période d'essaie (new Date().getTime() est équivalent <any>new Date() / 1)
                 }
                 return dataResponse(ctx, 200, { error: false, message: "Votre période d'essai viens d'être activé - 5min" });
             }else{// abonnement confirmé
@@ -86,9 +84,11 @@ export const addCard = async (ctx: RouterContext) => {
                 }else{
                     //data.default = data.default ? true : false;// convert true type string with true type boolean
                     data.month = parseInt(data.month) > 0 && parseInt(data.month) < 10 ? '0'.concat(data.month): data.month
-                    const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;
-                    const isNotNumber: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) ? true : false ;
-                    if(isNegative || isNotNumber || !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) || (data.default !== 'true' && data.default !== 'false') ){
+                    const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;// verif negative number
+                    const isInvalidFormat: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) || (data.default !== 'true' && data.default !== 'false')  ? true : false ;// verif conformité datas
+                    const isDataInvalidLength: boolean = !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) ? true : false;// verif taille datas
+                    const isInvalidDate: boolean = false;//TODO verif invalid date
+                    if(isNegative || isInvalidFormat || isDataInvalidLength || isInvalidDate){
                         return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
                     }else{
                         const customerId = (userParent.customerId === null || userParent.customerId === undefined) ? (await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname)).data.id : userParent.customerId;
@@ -155,8 +155,10 @@ const addBill = async (idStripePayment: string, idUser: string): Promise<void> =
  *  @param {Object} payloadToken
  */
 const abonnementDetails = async(userParent: UserInterfaces, payloadToken: any): Promise<void> => {
-    await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour"); //port 425 already in use
-    const product = await new ProductDB().selectProduct({ name : "Radio-FEED" });
-    const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
-    await addBill(responsePayment?.data.id, payloadToken.id); // ajout facture
+    if(await new FactureDB().count({ idUser : String(payloadToken.id) }) === 0){//Condition optionnel au cas où l'utilisateur ne recoit pas "son mail / son stripe payement / sa facture" 5 mins apres le lancement de la subscription
+        await sendMail(userParent.email.trim().toLowerCase(), "Abonnement radio feed", "Votre abonnement a bien été mise à jour"); //port 425 already in use
+        const product = await new ProductDB().selectProduct({ name : "Radio-FEED" });
+        const responsePayment = await paymentStripe(userParent.customerId, product.idProduct); //responseAddProduct.data.id est l'id price du produit
+        await addBill(responsePayment?.data.id, payloadToken.id); // ajout facture
+    }
 }

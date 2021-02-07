@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, numberFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
@@ -42,6 +42,7 @@ export const getSong = async (ctx: RouterContext) => {
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
+        //if(!numberFormat(String(idSong)) || idSong < 0) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
         const dbCollection = new UserDB();
         let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
         //let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);

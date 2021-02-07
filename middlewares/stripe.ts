@@ -175,16 +175,12 @@ export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): 
         return true;//fail
     }else{
         const isNegative: boolean = parseInt(data.cvc) < 0 || parseInt(data.id) < 0 ? true : false;
-        if(isNegative){
+        const isNotNumber: boolean = !numberFormat(data.id) || !numberFormat(data.cvc) ? true : false ;
+        if(isNegative || isNotNumber){
             return true;//fail
         }else{
-            const isNotNumber: boolean = !numberFormat(data.id) || !numberFormat(data.cvc) ? true : false ;
-            if(isNotNumber){
-                return true; //fail
-            }else{
-                //TODO: check card cvc 
-                return false;//success
-            }
+            //TODO: check card cvc 
+            return false;//success
         }
     }
 }
