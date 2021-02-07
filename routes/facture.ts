@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength, updateSubscriptionChilds } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength, updateSubscriptionChilds, numberFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
@@ -84,10 +84,11 @@ export const addCard = async (ctx: RouterContext) => {
                 if(userParent.role !== 'Tuteur'){
                     return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
                 }else{
-                    data.default = data.default ? true : false;// convert true type string with true type boolean
+                    //data.default = data.default ? true : false;// convert true type string with true type boolean
                     data.month = parseInt(data.month) > 0 && parseInt(data.month) < 10 ? '0'.concat(data.month): data.month
                     const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;
-                    if(isNegative || !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) || (data.default !== true && data.default !== false)){
+                    const isNotNumber: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) ? true : false ;
+                    if(isNegative || isNotNumber || !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) || (data.default !== 'true' && data.default !== 'false') ){
                         return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
                     }else{
                         const customerId = (userParent.customerId === null || userParent.customerId === undefined) ? (await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname)).data.id : userParent.customerId;
@@ -95,7 +96,7 @@ export const addCard = async (ctx: RouterContext) => {
                         if(respCardRequest.status === 402 && respCardRequest.data.error){
                             return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//Le numéro de la carte est invalide
                         }else{
-                            await updateCustomerCardStripe(customerId, respCardRequest.card.id);
+                            await updateCustomerCardStripe(customerId, respCardRequest.id);
                             let cardList: Array<cardTypes> | undefined = []
                             cardList = userParent.cardInfos;
                             const cardInfos = {

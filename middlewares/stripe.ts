@@ -1,7 +1,8 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
-import { isValidLength } from "./index.ts";
+import { isValidLength, numberFormat } from "./index.ts";
 import { config } from '../config/config.ts';
 import UserInterfaces from "../interfaces/UserInterfaces.ts";
+import { cardTypes } from "../types/cardTypes.ts";
 
 const {
     STRIPE_SECRET_KEY,
@@ -150,13 +151,19 @@ export const deleteCustomerStripe = async(idCustomer: string, idCard: string) =>
  *  Check si la carte existe deja ou pas (true = existe deja et false = n'existe pas)
  */ 
 export const checkIsCardAlreadyExist = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
-    //const allCards: Array<any> = (await getAllCardsCustomerStripe(userParent.customerId)).data.data;// tableau de cartes bancaires 
-    const cardInfosLength: number | undefined = userParent.cardInfos?.filter(item => item.cartNumber === parseInt(data.cartNumber)).length;
+    //const allCards: Array<any> = (await getAllCardsCustomerStripe(userParent.customerId)).data.data;// tableau de cartes bancaires
+    let filterTab = [];
+    userParent.cardInfos?.forEach((item: cardTypes) => {
+        if(parseInt(String(item.cartNumber)) === parseInt(data.cartNumber)){
+            filterTab?.push(item)
+        }
+    });
+    const cardInfosLength: number | undefined = filterTab?.length;
     if(cardInfosLength === undefined) console.log('UNDEFINED TO FIX !')
-    if(cardInfosLength === 1){
-        return true;// existe deja
-    }else{
+    if(cardInfosLength === 0 ){
         return false;// n'existe pas
+    }else{
+        return true;// existe deja
     }
 }
 
@@ -171,8 +178,13 @@ export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): 
         if(isNegative){
             return true;//fail
         }else{
-            //TODO: check card cvc 
-            return false;//success
+            const isNotNumber: boolean = !numberFormat(data.id) || !numberFormat(data.cvc) ? true : false ;
+            if(isNotNumber){
+                return true; //fail
+            }else{
+                //TODO: check card cvc 
+                return false;//success
+            }
         }
     }
 }
