@@ -1,4 +1,4 @@
-import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength, updateSubscriptionChilds } from "../middlewares/index.ts";
+import { dataRequest, deleteMapper, exist, getChildsByParent, isValidPasswordLength, passwordFormat, dataResponse, textFormat, getCurrentDate, randomFloat, floatFormat, calculHtToTtc, calculTtcToHt, isValidLength, updateSubscriptionChilds, numberFormat } from "../middlewares/index.ts";
 import { UserModels } from "../Models/UserModels.ts";
 import { RouterContext } from "https://deno.land/x/oak/mod.ts";//download
 import { UserDB } from "../db/userDB.ts";
@@ -12,7 +12,7 @@ import FactureInterfaces from "../interfaces/FactureInterfaces.ts";
 import { v4 } from "https://deno.land/std@0.84.0/uuid/mod.ts";
 import type { float, DateString } from 'https://deno.land/x/etype/mod.ts';
 import { sendMail } from "../helpers/mail.ts";
-import { addCardStripe, addCustomerStripe, updateCustomerCardStripe, paymentStripe } from "../middlewares/stripe.ts";
+import { addCardStripe, addCustomerStripe, updateCustomerCardStripe, paymentStripe, checkIsCardAlreadyExist, checkIsFailPayment } from "../middlewares/stripe.ts";
 import { ProductDB } from "../db/ProductDB.ts";
 import { cardTypes } from "../types/cardTypes.ts";
 
@@ -28,9 +28,8 @@ export const subscription = async (ctx: RouterContext) => {
     }else{
         const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
         if (payloadToken === null || payloadToken === undefined ) return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
-        const userParent = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
-        //let isError = false;
-        if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.filter(item => item.id_carte === parseInt(data.id)).length === 0){
+        const userParent: UserInterfaces = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        if(await checkIsFailPayment(userParent, data)){// true = fail payement et false = success payement
             return dataResponse(ctx, 402, { error: true, message: "Echec du payement de l'offre"})
         }else{
             if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
@@ -74,38 +73,46 @@ export const addCard = async (ctx: RouterContext) => {
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     } else{
+        const userParent: UserInterfaces = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
         let isError = false
         if(isError){
-            return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"})
+            return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//incoherence ordre
         }else{
-            if(isError){
+            if(await checkIsCardAlreadyExist(userParent, data)){//true = card exist deja
                 return dataResponse(ctx, 409, { error: true, message: "La carte existe déjà"})
             }else{
-                const userParent = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
                 if(userParent.role !== 'Tuteur'){
                     return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
                 }else{
-                    data.default = data.default ? true : false;// convert true type string with true type boolean
-                    if(!isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) || (data.default !== true && data.default !== false)){
+                    //data.default = data.default ? true : false;// convert true type string with true type boolean
+                    data.month = parseInt(data.month) > 0 && parseInt(data.month) < 10 ? '0'.concat(data.month): data.month
+                    const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;
+                    const isNotNumber: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) ? true : false ;
+                    if(isNegative || isNotNumber || !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) || (data.default !== 'true' && data.default !== 'false') ){
                         return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
                     }else{
-                        let cardList: Array<cardTypes> | undefined = []
-                        cardList = userParent.cardInfos;
-                        const cardInfos = {
-                            id_carte: await new UserDB().getUniqId(),
-                            cartNumber: data.cartNumber,
-                            month: data.month,
-                            year: data.year,
-                            default: data.default
+                        const customerId = (userParent.customerId === null || userParent.customerId === undefined) ? (await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname)).data.id : userParent.customerId;
+                        const respCardRequest = await addCardStripe(data.cartNumber, data.month, data.year);
+                        if(respCardRequest.status === 402 && respCardRequest.data.error){
+                            return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//Le numéro de la carte est invalide
+                        }else{
+                            await updateCustomerCardStripe(customerId, respCardRequest.id);
+                            let cardList: Array<cardTypes> | undefined = []
+                            cardList = userParent.cardInfos;
+                            const cardInfos = {
+                                id_carte: await new UserDB().getUniqId(),
+                                cartNumber: data.cartNumber,
+                                month: data.month,
+                                year: data.year,
+                                default: data.default,
+                                cardIdStripe: respCardRequest.card.id
+                            }
+                            cardList?.push(cardInfos)
+                            let utilisateur = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
+                            utilisateur.setId(<{ $oid: string }>userParent._id)
+                            await utilisateur.update({ cardInfos: cardList, customerId : customerId})
+                            return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
                         }
-                        cardList?.push(cardInfos)
-                        const responseAddCard = await addCardStripe(cardInfos.cartNumber, cardInfos.month, cardInfos.year); //4242424242424242, 11, 22, 123
-                        const responseAddCustomer = await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname);
-                        await updateCustomerCardStripe(responseAddCustomer.data.id, responseAddCard.data.id);
-                        let utilisateur = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
-                        utilisateur.setId(<{ $oid: string }>userParent._id)
-                        await utilisateur.update({ cardInfos: cardList, customerId : responseAddCustomer.data.id})
-                        return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
                     }
                 }
             }
