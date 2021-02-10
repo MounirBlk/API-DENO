@@ -324,5 +324,19 @@ const initProductStripe = async(name: string = 'Radio-FEED', description: string
     }
 }
 
-export { dataRequest, dataResponse, initProductStripe, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent};
+/**
+ * Function verfication la conformiter de la date de la carte
+ *  @param {Object} data data
+ */
+const isValidDateCard = (data: any): boolean => {
+    let today = new Date;
+    let year = today.getFullYear().toString().substr(-2);
+    let month = String(today.getMonth()+1);
+    month = parseInt(month) > 0 && parseInt(month) < 10 ? '0'.concat(String(parseInt(month))) : month
+    let verifYear: boolean = data.year > year ? true : false
+    let isValidDate: boolean = data.year === year ? parseInt(data.month) >= parseInt(month) ? true : false : verifYear;
+    return isValidDate;
+}
+
+export { dataRequest, dataResponse, initProductStripe, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent, isValidDateCard};
 
