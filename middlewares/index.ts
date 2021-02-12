@@ -82,6 +82,17 @@ const exist = (data: string): Boolean => {
 }
 
 /**
+ *  Function qui vérifie l'existence de toutes les datas d'un objet
+ */ 
+const existObject = (objectData: any): boolean => {
+    let isValid = true;
+    for(let o in objectData){
+        if(!exist(o)) isValid = false;
+    }
+    return isValid;
+}
+
+/**
  *  Function vérification de si la date est dans le bon format à l'envoi (FR)
  */ 
 const dateFormatFr = (data: string): Boolean => {
@@ -338,5 +349,5 @@ const isValidDateCard = (data: any): boolean => {
     return isValidDate;
 }
 
-export { dataRequest, dataResponse, initProductStripe, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent, isValidDateCard};
+export { dataRequest, dataResponse, existObject, initProductStripe, initFiles, updateSubscriptionChilds, getCurrentDate, calculHtToTtc, calculTtcToHt, randomFloat, textToBinary, binaryToText, isValidLength, isValidPasswordLength, deleteMapper, exist, dateFormatFr, dateFormatEn, emailFormat, passwordFormat, zipFormat, textFormat, numberFormat, floatFormat, getChildsByParent, isValidDateCard};
 

@@ -19,7 +19,7 @@ const login = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     // Vérification de si les données sont bien présentes dans le body
     if(data === undefined || data === null) return dataResponse(ctx, 400, { error: true, message: 'Email/password manquants'})
-    if(data === undefined || data === null || exist(data.Email) == false || exist(data.Password) == false){
+    if(exist(data.Email) == false || exist(data.Password) == false){
         return dataResponse(ctx, 400, { error: true, message: 'Email/password manquants'})
     }else{
         //const user: any = await db.collection('users').findOne({ email: Email.trim().toLowerCase() })
