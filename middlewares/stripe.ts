@@ -151,7 +151,7 @@ export const deleteCustomerStripe = async(idCustomer: string, idCard: string) =>
  *  Check si la carte existe deja ou pas (true = existe deja et false = n'existe pas)
  */ 
 export const checkIsCardAlreadyExist = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
-    //const allCards: Array<any> = (await getAllCardsCustomerStripe(userParent.customerId)).data.data;// tableau de cartes bancaires
+    //const allCards: Array<any> = (await getAllCardsCustomerStripe(userParent.customerId)).data.data;// tab de cartes bancaires
     let filterTab = [];
     userParent.cardInfos?.forEach((item: cardTypes) => {
         if(parseInt(String(item.cartNumber)) === parseInt(data.cartNumber)){
@@ -159,7 +159,7 @@ export const checkIsCardAlreadyExist = async(userParent: UserInterfaces, data: a
         }
     });
     const cardInfosLength: number | undefined = filterTab?.length;
-    if(cardInfosLength === undefined) console.log('UNDEFINED TO FIX !')
+    if(cardInfosLength === undefined) console.log('UNDEFINED TO FIX !')// ?
     if(cardInfosLength === 0 ){
         return false;// n'existe pas
     }else{
@@ -167,11 +167,12 @@ export const checkIsCardAlreadyExist = async(userParent: UserInterfaces, data: a
     }
 }
 
+
 /**
- *  Check si le payment a fonctionné ou pas (true = fail et false = success)
+ *  Check conformité sub card (true = fail et false = success)
  */ 
-export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
-    if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10) || userParent.cardInfos?.filter(item => item.id_carte === parseInt(data.id)).length === 0){
+export const checkIsNonConformeSub = (data: any): boolean => {
+    if(!isValidLength(data.cvc, 3, 3) || !isValidLength(data.id, 1, 10)){
         return true;//fail
     }else{
         const isNegative: boolean = parseInt(data.cvc) < 0 || parseInt(data.id) < 0 ? true : false;
@@ -179,9 +180,20 @@ export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): 
         if(isNegative || isNotNumber){
             return true;//fail
         }else{
-            //TODO: check card cvc 
             return false;//success
         }
+    }
+}
+
+/**
+ *  Check si le payment a fonctionné ou pas (true = fail et false = success)
+ */ 
+export const checkIsFailPayment = async(userParent: UserInterfaces, data: any): Promise<boolean> => {
+    if(userParent.cardInfos?.filter(item => item.id_carte === parseInt(data.id)).length === 0){
+        return true;//fail
+    }else{
+        //TODO: check card cvc 
+        return false;//success
     }
 }
 
@@ -201,7 +213,7 @@ const getConfigAxiod = (methodReq: string, dataBody: any = null) => {
         },
         data: dataBody
     };
-    dataBody === null ? delete configAxiod.data : configAxiod;
+    dataBody === null ? delete configAxiod.data : null;
     return configAxiod;
 }
 

@@ -77,8 +77,9 @@ const deleteChild = async (ctx: RouterContext) => {
             return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         } else{
             const dbCollectionChildExist = new UserDB();
-            // verifier la condition du data.id.length
-            if (data == undefined || data == null || !exist(data.id) || data.id.length !== 24 || await dbCollectionChildExist.count({ _id: new Bson.ObjectId(data.id) }) === 0) return dataResponse(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
+            // verifier la condition du data.id.length 
+            if(data == undefined || data == null || !exist(data.id)) return dataResponse(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})
+            if(data.id.length !== 24 || await dbCollectionChildExist.count({ _id: new Bson.ObjectId(data.id) }) === 0) return dataResponse(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
             if(userParent !== undefined && userParent !== null){
                 if(userParent.childsTab.filter(item => item.toString() === data.id).length === 0 && userParent.childsTab.find(item => item.toString() === data.id) === undefined){
                     return dataResponse(ctx, 403, { error: true, message: "Vous ne pouvez pas supprimer cet enfant"}) 
@@ -103,7 +104,6 @@ const deleteChild = async (ctx: RouterContext) => {
 const getChilds = async (ctx: RouterContext) => {
     //const data = await dataRequest(ctx);
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-    //if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: 'Votre token n\'est pas correct'})
     } else {
