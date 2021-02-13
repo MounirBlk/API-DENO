@@ -87,7 +87,7 @@ const deleteChild = async (ctx: RouterContext) => {
                     await dbCollection.delete({ _id: new Bson.ObjectId(data.id) })
                     const utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
                     utilisateurParent.setId(<{ $oid: string }>userParent._id)
-                    utilisateurParent.update({childsTab: userParent.childsTab.filter(item => item.toString() !== data.id)})
+                    await utilisateurParent.update({childsTab: userParent.childsTab.filter(item => item.toString() !== data.id)})
                     return dataResponse(ctx, 200, { error: false, message: "L'utilisateur a été supprimée avec succès"})
                 }
             }else{

@@ -90,12 +90,11 @@ export const addCard = async (ctx: RouterContext) => {
                 if(await checkIsCardAlreadyExist(userParent, data)){//true = card exist deja
                     return dataResponse(ctx, 409, { error: true, message: "La carte existe déjà"})
                 }else{
-                    const customerId = (userParent.customerId === null || userParent.customerId === undefined) ? (await addCustomerStripe(userParent.email, userParent.firstname + ' ' + userParent.lastname)).data.id : userParent.customerId;
                     const respCardRequest = await addCardStripe(data.cartNumber, data.month, data.year);
                     if(respCardRequest.status === 402 && respCardRequest.data.error){
                         return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//Le numéro de la carte est invalide
                     }else{
-                        await updateCustomerCardStripe(customerId, respCardRequest.id);
+                        await updateCustomerCardStripe(userParent.customerId, respCardRequest.id);
                         let cardList: Array<cardTypes> | undefined = []
                         cardList = userParent.cardInfos;
                         const cardInfos = {
@@ -109,7 +108,7 @@ export const addCard = async (ctx: RouterContext) => {
                         cardList?.push(cardInfos)
                         let utilisateur = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
                         utilisateur.setId(<{ $oid: string }>userParent._id)
-                        await utilisateur.update({ cardInfos: cardList, customerId : customerId })
+                        await utilisateur.update({ cardInfos: cardList})
                         return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
                     }
                 }

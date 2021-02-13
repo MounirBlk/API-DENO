@@ -8,7 +8,7 @@ export default class DateException extends Error {
      * @param {string} date 
      */
     static isValidDate(date: string): boolean {
-        const reg = /^\d{4}\-\d{1,2}\-\d{1,2}$/
+        const reg = /^\d{4}\-\d{1,2}\-\d{1,2}$/ //reg date incorrecte !!
         return (reg.test(date.toLowerCase().trim()))
     }
 

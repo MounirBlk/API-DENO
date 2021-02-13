@@ -48,7 +48,7 @@ export const getSong = async (ctx: RouterContext) => {
             return dataResponse(ctx, 403, { error: true, message: "Votre abonnement ne permet pas d'accéder à la ressource"})
         }else{
             if(idSong === null || !exist(String(idSong))) return dataResponse(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})///
-            if(!numberFormat(String(idSong)) || idSong < 1) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})///
+            if(!numberFormat(String(idSong)) || idSong < 1 || await new SongDB().count({ id: idSong }) === 0) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})///
             let song = await new SongDB().selectSong({id:idSong})
             play(song.url)
             return dataResponse(ctx, 201, { error: false, songs: deleteMapper(song,'getSong')})
