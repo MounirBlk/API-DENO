@@ -11,6 +11,7 @@ import DateException from "../exceptions/DateException.ts";
 import EmailException from "../exceptions/EmailException.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 import {sendMail} from "../helpers/mail.ts"
+import { addCustomerStripe, deleteCustomerStripe, updateCustomerStripe } from "../middlewares/stripe.ts";
 /**
  *  Route login user
  *  @param {RouterContext} ctx 
@@ -94,6 +95,9 @@ const register = async (ctx: RouterContext) => {
                 //insertion dans la base de données 
                 let utilisateur = new UserModels(data.email, data.password, data.lastname, data.firstname, data.date_naissance, data.sexe, 0, 0);
                 const utilisateurId = await utilisateur.insert();
+                const customerId =  (await addCustomerStripe(data.email, data.firstname + ' ' + data.lastname)).data.id ;
+                utilisateur.setId(<{ $oid: string}>utilisateurId)
+                await utilisateur.update({customerId: customerId})                
                 const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
                 await sendMail(data.email.trim().toLowerCase(), "Welcome!", "Bienvenue sur deno radio feed!")
                 return dataResponse(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user) })
@@ -117,6 +121,7 @@ const deleteUser = async (ctx: RouterContext) => {
             await new UserDB().delete({ _id: userParent.childsTab[i] })
         }
         await dbCollection.delete({ _id: new Bson.ObjectId(payloadToken.id) })
+        await deleteCustomerStripe(userParent.customerId)
         return dataResponse(ctx, 200, { error: false, message: 'Votre compte et le compte de vos enfants ont été supprimés avec succès' })
     }
 }
@@ -147,7 +152,8 @@ const updateUtil = async (ctx: RouterContext) => {
             }else{
                 let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
                 utilisateur.setId(<{ $oid: string}>user._id)
-                utilisateur.update(toUpdate)
+                await utilisateur.update(toUpdate)
+                await updateCustomerStripe(user.customerId, data, user)
                 return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"}) 
             }  
         }
@@ -168,7 +174,7 @@ const deconnexion = async (ctx: RouterContext) => {
         let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
         let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
         utilisateur.setId(<{ $oid: string}>user._id)
-        utilisateur.update({token:null})
+        await utilisateur.update({token:null})
         return dataResponse(ctx, 200, { error: false, message:"L'utilisateur a été déconnecté avec succès"}); 
     }
 }

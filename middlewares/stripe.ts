@@ -46,7 +46,8 @@ export const addCustomerStripe = async(email: string, fullName: string) => {
 /**
  *  Update customer with card token (secure) stripe
  */ 
-export const updateCustomerCardStripe = async(idCustomer: string, idCard: string) => {
+export const updateCustomerCardStripe = async(idCustomer: string | undefined , idCard: string) => {
+    if(idCustomer === undefined || idCustomer === null) return;
     let payload: any = {
         'source' : idCard
     };
@@ -130,6 +131,47 @@ export const getAllCardsCustomerStripe = async(idCustomer: string | undefined) =
 }
 
 /**
+ *  Modifier les données clients Stripe
+ */ 
+export const updateCustomerStripe = async(idCustomer: string | undefined, data: any, user: UserInterfaces): Promise<any>=> {
+    return new Promise(async(resolve, reject) => {
+        if(idCustomer === null || idCustomer === undefined){
+            reject();
+        }else{
+            let payload: any = { 
+                "email": user.email,
+                "name": data.firstname+' '+data.lastname,  
+            };
+            const dataBody = convertToFormBody(payload);
+            await axiod(`https://api.stripe.com/v1/customers/${idCustomer}`, getConfigAxiod('post', dataBody))
+                .then((data) => {
+                    resolve(data)
+                }).catch((error) => {
+                    reject(error)
+                })
+        }
+    });
+}
+
+/**
+ *  Supprimer le clients Stripe
+ */ 
+export const deleteCustomerStripe = async(idCustomer: string | undefined): Promise<any>=> {
+    return new Promise(async(resolve, reject) => {
+        if(idCustomer === null || idCustomer === undefined){
+            reject();
+        }else{
+            await axiod(`https://api.stripe.com/v1/customers/${idCustomer}`, getConfigAxiod('delete'))
+                .then((response) => {
+                    resolve(response)
+                }).catch((error) => {
+                    reject(error)
+                })
+        }
+    });
+}
+
+/**
  *  Function get one card from customer
  *  @param idCustomer idCustomer
  *  @param idCard idCard
@@ -143,7 +185,7 @@ export const getCardCustomerStripe = async(idCustomer: string, idCard: string) =
  *  @param idCustomer idCustomer
  *  @param idCard idCard
  */ 
-export const deleteCustomerStripe = async(idCustomer: string, idCard: string) => {
+export const detachCardCustomerStripe = async(idCustomer: string, idCard: string) => {
     return await axiod(`https://api.stripe.com/v1/customers/${idCustomer}/sources/${idCard}`, getConfigAxiod('delete'))
 }
 
