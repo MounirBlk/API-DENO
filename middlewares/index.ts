@@ -68,6 +68,7 @@ const deleteMapper = (data: any, mapperNameRoute?: string): any => {
     delete data.cardInfos;
     delete data.dateSouscription;
     delete data.customerId;
+    mapperNameRoute === 'getChilds' ? delete data.email : null
     return data;
 }
 

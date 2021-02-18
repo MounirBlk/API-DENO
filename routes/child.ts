@@ -24,7 +24,6 @@ const newChild = async (ctx: RouterContext) => {
         return dataResponse(ctx, 400, { error: true, message: 'Une ou plusieurs données obligatoire sont manquantes'})
     }else{
         const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-        //if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
         if (payloadToken === null || payloadToken === undefined ) return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
         const dbCollection = new UserDB();
         const userParent = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
@@ -67,7 +66,6 @@ const newChild = async (ctx: RouterContext) => {
 const deleteChild = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-    //if (payloadToken === false) return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})//error taille du token invalide
     if(payloadToken === null || payloadToken === undefined){
         return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     } else{
@@ -113,7 +111,7 @@ const getChilds = async (ctx: RouterContext) => {
             return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
         } else {
             let childs: any = await getChildsByParent(userParent)//return les enfants d'un parent en fonction de userParent collection
-            return dataResponse(ctx, 200, { error: false, users: childs.map((item: UserInterfaces) => deleteMapper(item)) })
+            return dataResponse(ctx, 200, { error: false, users: childs.map((item: UserInterfaces) => deleteMapper(item, 'getChilds')) })
         }
     }
 }
