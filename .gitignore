@@ -119,3 +119,5 @@ dist
 cmd_git
 .deno_plugins
 corporate.pem
+
+routes/addCard.txt

@@ -32,10 +32,10 @@ export const subscription = async (ctx: RouterContext) => {
             const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
             if (payloadToken === null || payloadToken === undefined ) return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
             const userParent: UserInterfaces = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
-            if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
             if(await checkIsFailPayment(userParent, data)){// true = fail payement et false = success payement
                 return dataResponse(ctx, 402, { error: true, message: "Echec du payement de l'offre"})
             }else{
+                if (userParent.role !== 'Tuteur') return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})///
                 if(((<any>new Date() - <any>userParent.dateSouscription) / 1000 / 60) <= 5 || userParent.dateSouscription === null){// periode d'essaie activé
                     if(<number>userParent.subscription === 0){
                         let utilisateurParent = new UserModels(userParent.email, userParent.password, userParent.lastname, userParent.firstname, userParent.dateNaissance, userParent.sexe, userParent.attempt, userParent.subscription);
@@ -71,28 +71,27 @@ export const addCard = async (ctx: RouterContext) => {
     const data = await dataRequest(ctx);
     if(data === undefined || data === null) return dataResponse(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})
     if(exist(data.cartNumber) === false || exist(data.month) === false || exist(data.year) === false || exist(data.default) === false) return dataResponse(ctx, 400, { error: true, message: "Une ou plusieurs données obligatoire sont manquantes"})
-    //data.default = data.default ? true : false;// convert true type string with true type boolean
-    data.month = parseInt(data.month) > 0 && parseInt(data.month) < 10 ? '0'.concat(String(parseInt(data.month))) : data.month
-    const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;// verif negative number
-    const isInvalidFormat: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) || (data.default !== 'true' && data.default !== 'false')  ? true : false ;// verif conformité datas
-    const isDataInvalidLength: boolean = !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) ? true : false;// verif taille datas
-    if(isNegative || isInvalidFormat || isDataInvalidLength || isValidDateCard(data) === false){
-        return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
+    const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
+    if(payloadToken === null || payloadToken === undefined){
+        return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
-        const payloadToken = await getJwtPayload(ctx, ctx.request.headers.get("Authorization"));// Payload du token
-        if(payloadToken === null || payloadToken === undefined){
-            return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
-        } else{
-            const userParent: UserInterfaces = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
-            if(userParent.role !== 'Tuteur'){
-                return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
+        const userParent: UserInterfaces = await new UserDB().selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
+        data.month = parseInt(data.month) > 0 && parseInt(data.month) < 10 ? '0'.concat(String(parseInt(data.month))) : data.month
+        const respCardRequest = await addCardStripe(data.cartNumber, data.month, data.year);
+        if(respCardRequest.status === 402 && respCardRequest.data.error){
+            return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//Le numéro de la carte est invalide
+        }else{
+            if(await checkIsCardAlreadyExist(userParent, data)){//true = card exist deja
+                return dataResponse(ctx, 409, { error: true, message: "La carte existe déjà"})
             }else{
-                if(await checkIsCardAlreadyExist(userParent, data)){//true = card exist deja
-                    return dataResponse(ctx, 409, { error: true, message: "La carte existe déjà"})
+                if(userParent.role !== 'Tuteur'){
+                    return dataResponse(ctx, 403, { error: true, message: "Vos droits d'accès ne permettent pas d'accéder à la ressource"})
                 }else{
-                    const respCardRequest = await addCardStripe(data.cartNumber, data.month, data.year);
-                    if(respCardRequest.status === 402 && respCardRequest.data.error){
-                        return dataResponse(ctx, 402, { error: true, message: "Informations bancaire incorrectes"});//Le numéro de la carte est invalide
+                    const isNegative: boolean =  parseInt(data.cartNumber) < 0 || parseInt(data.month) < 0 || parseInt(data.year) < 0 ? true : false;// verif negative number
+                    const isInvalidFormat: boolean = !numberFormat(data.cartNumber) || !numberFormat(data.month) || !numberFormat(data.year) || (data.default !== 'true' && data.default !== 'false')  ? true : false ;// verif conformité datas
+                    const isDataInvalidLength: boolean = !isValidLength(data.cartNumber, 16, 16) || !isValidLength(data.month, 2, 2) || !isValidLength(data.year, 2, 2) ? true : false;// verif taille datas
+                    if(isNegative || isInvalidFormat || isDataInvalidLength || isValidDateCard(data) === false){
+                        return dataResponse(ctx, 409, { error: true, message: "Une ou plusieurs données sont erronées"})
                     }else{
                         await updateCustomerCardStripe(userParent.customerId, respCardRequest.id);
                         let cardList: Array<cardTypes> | undefined = []

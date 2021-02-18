@@ -12,6 +12,7 @@ import EmailException from "../exceptions/EmailException.ts";
 import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 import {sendMail} from "../helpers/mail.ts"
 import { addCustomerStripe, deleteCustomerStripe, updateCustomerStripe } from "../middlewares/stripe.ts";
+
 /**
  *  Route login user
  *  @param {RouterContext} ctx 
@@ -28,7 +29,7 @@ const login = async (ctx: RouterContext) => {
             return dataResponse(ctx, 400, { error: true, message: 'Email/password incorrect'});
         }else{
             const dbCollection =  new UserDB();
-            const user = await dbCollection.selectUser({email : data.Email.trim().toLowerCase()})
+            const user = await dbCollection.selectUser({ email : data.Email.trim().toLowerCase() })
             if (user == undefined || user == null) {
                 return dataResponse(ctx, 400, { error: true, message: 'Email/password incorrect'})
             }else{
@@ -97,7 +98,7 @@ const register = async (ctx: RouterContext) => {
                 const utilisateurId = await utilisateur.insert();
                 const customerId =  (await addCustomerStripe(data.email, data.firstname + ' ' + data.lastname)).data.id ;
                 utilisateur.setId(<{ $oid: string}>utilisateurId)
-                await utilisateur.update({customerId: customerId})                
+                await utilisateur.update({ customerId: customerId })                
                 const user = await new UserDB().selectUser({ _id: new Bson.ObjectId(utilisateurId) })
                 await sendMail(data.email.trim().toLowerCase(), "Welcome!", "Bienvenue sur deno radio feed!")
                 return dataResponse(ctx, 201, { error: false, message: "L'utilisateur a bien été créé avec succès", user: deleteMapper(user) })
@@ -136,12 +137,12 @@ const updateUtil = async (ctx: RouterContext) => {
     if(payloadToken === null || payloadToken === undefined) 
         {return dataResponse(ctx, 401, { error: true, message: "Votre token n'est pas correct"})
     }else{
-        if(data===null||data===undefined){
+        if(data===null || data===undefined){
             return dataResponse(ctx, 200, { error: false, message: "Vos données ont été mises à jour"})
         }else{ 
             const dbCollection = new UserDB();
             let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
-            let toUpdate={firstname:'', lastname:'', dateNaissance:'', sexe:''}
+            let toUpdate = { firstname:'', lastname:'', dateNaissance:'', sexe:'' }
             let isError = false;
             toUpdate.firstname = exist(data.firstname) ? !textFormat(data.firstname) ? (isError = true) : data.firstname : user.firstname;
             toUpdate.lastname = exist(data.lastname) ? !textFormat(data.lastname) ? (isError = true) : data.lastname : user.lastname;
@@ -174,8 +175,8 @@ const deconnexion = async (ctx: RouterContext) => {
         let user = await dbCollection.selectUser({ _id: new Bson.ObjectId(payloadToken.id) })
         let utilisateur = new UserModels(user.email, user.password, user.lastname, user.firstname, user.dateNaissance, user.sexe, user.attempt, user.subscription);
         utilisateur.setId(<{ $oid: string}>user._id)
-        await utilisateur.update({token:null})
-        return dataResponse(ctx, 200, { error: false, message:"L'utilisateur a été déconnecté avec succès"}); 
+        await utilisateur.update({ token:null })
+        return dataResponse(ctx, 200, { error: false, message: "L'utilisateur a été déconnecté avec succès"}); 
     }
 }
 
